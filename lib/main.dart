@@ -37,16 +37,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final supabaseClient = Supabase.instance.client;
-    
+
     return MultiProvider(
       providers: [
         Provider<AuthService>(
           create: (_) => AuthServiceImpl(supabaseClient: supabaseClient),
         ),
         ChangeNotifierProvider<AuthProvider>(
-          create: (context) => AuthProvider(
-            authService: context.read<AuthService>(),
-          ),
+          create: (context) =>
+              AuthProvider(authService: context.read<AuthService>()),
         ),
       ],
       child: MaterialApp(
@@ -60,16 +59,14 @@ class MyApp extends StatelessWidget {
             // Show loading while checking auth state
             if (authProvider.isLoading) {
               return const Scaffold(
-                body: Center(
-                  child: CircularProgressIndicator(),
-                ),
+                body: Center(child: CircularProgressIndicator()),
               );
             }
-            
+
             // Route based on login state
-            return authProvider.isLoggedIn 
-              ? const HomeMenuScreen() 
-              : const LoginScreen();
+            return authProvider.isLoggedIn
+                ? const HomeMenuScreen()
+                : const LoginScreen();
           },
         ),
         debugShowCheckedModeBanner: false,

@@ -113,7 +113,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 28),
                       Text(
                         'iLaba',
-                        style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                        style: Theme.of(context).textTheme.displayMedium
+                            ?.copyWith(
                               color: colorScheme.onSurface,
                               fontWeight: FontWeight.bold,
                             ),
@@ -122,9 +123,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         'Laundry Services Made Easy',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w400,
-                            ),
+                          color: colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
                     ],
                   ),
@@ -150,7 +151,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: colorScheme.onSurfaceVariant,
                             ),
                             filled: true,
-                            fillColor: colorScheme.surfaceVariant.withOpacity(0.35),
+                            fillColor: colorScheme.surfaceVariant.withOpacity(
+                              0.35,
+                            ),
                             border: InputBorder.none,
                             enabledBorder: InputBorder.none,
                             focusedBorder: InputBorder.none,
@@ -190,7 +193,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                             ),
                             filled: true,
-                            fillColor: colorScheme.surfaceVariant.withOpacity(0.35),
+                            fillColor: colorScheme.surfaceVariant.withOpacity(
+                              0.35,
+                            ),
                             border: InputBorder.none,
                             enabledBorder: InputBorder.none,
                             focusedBorder: InputBorder.none,
@@ -231,11 +236,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         Consumer<AuthProvider>(
                           builder: (context, authProvider, _) {
                             return FilledButton(
-                              onPressed:
-                                  authProvider.isLoading ? null : _handleLogin,
+                              onPressed: authProvider.isLoading
+                                  ? null
+                                  : _handleLogin,
                               style: FilledButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                                 disabledBackgroundColor:
                                     colorScheme.surfaceVariant,
                                 disabledForegroundColor:

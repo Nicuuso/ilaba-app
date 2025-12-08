@@ -23,9 +23,7 @@ class HomeMenuScreen extends StatelessWidget {
             Navigator.of(context).pushReplacementNamed('/login');
           });
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
@@ -65,103 +63,105 @@ class HomeMenuScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-            const SizedBox(height: 20),
-            // Menu Cards
-            Expanded(
-              child: ListView(
-                children: [
-                  MenuCard(
-                    title: "Book a Service",
-                    description: "Schedule your laundry pick-up and delivery.",
-                    icon: Icons.shopping_bag,
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const BookingMapScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  MenuCard(
-                    title: "Check Order Status",
-                    description: "Track your current laundry orders.",
-                    icon: Icons.track_changes,
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const OrderStatusScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  MenuCard(
-                    title: "View Order History",
-                    description: "See your past orders and receipts.",
-                    icon: Icons.history,
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const OrderHistoryScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  MenuCard(
-                    title: "Loyalty Card Program",
-                    description: "Check your points and rewards.",
-                    icon: Icons.card_membership,
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoyaltyProgramScreen(),
-                        ),
-                      );
-                    },
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // FAQ & Help Center button
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 253, 132, 174),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        elevation: 0,
+                const SizedBox(height: 20),
+                // Menu Cards
+                Expanded(
+                  child: ListView(
+                    children: [
+                      MenuCard(
+                        title: "Book a Service",
+                        description:
+                            "Schedule your laundry pick-up and delivery.",
+                        icon: Icons.shopping_bag,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const BookingMapScreen(),
+                            ),
+                          );
+                        },
                       ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const FAQScreen(),
+                      MenuCard(
+                        title: "Check Order Status",
+                        description: "Track your current laundry orders.",
+                        icon: Icons.track_changes,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const OrderStatusScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      MenuCard(
+                        title: "View Order History",
+                        description: "See your past orders and receipts.",
+                        icon: Icons.history,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const OrderHistoryScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      MenuCard(
+                        title: "Loyalty Card Program",
+                        description: "Check your points and rewards.",
+                        icon: Icons.card_membership,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const LoyaltyProgramScreen(),
+                            ),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // FAQ & Help Center button
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 253, 132, 174),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            elevation: 0,
                           ),
-                        );
-                      },
-                      icon: const Icon(Icons.help_outline),
-                      label: const Text(
-                        "FAQ & Help Center",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const FAQScreen(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.help_outline),
+                          label: const Text(
+                            "FAQ & Help Center",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
         );
       },
     );
