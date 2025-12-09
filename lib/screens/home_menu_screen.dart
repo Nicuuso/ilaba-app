@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ilaba/providers/auth_provider.dart';
-import 'package:ilaba/screens/booking_map.dart';
+import 'package:ilaba/screens/booking_flow_screen.dart';
 import 'package:ilaba/screens/faq_screen.dart';
 import 'package:ilaba/screens/loyalty_screen.dart';
 import 'package:ilaba/screens/menu_side_screen.dart';
-import 'package:ilaba/screens/order_history_screen.dart';
-import 'package:ilaba/screens/order_status.dart';
+import 'package:ilaba/screens/orders_screen.dart';
 import 'package:ilaba/widgets/menu_card.dart';
 
 class HomeMenuScreen extends StatelessWidget {
@@ -77,33 +76,20 @@ class HomeMenuScreen extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const BookingMapScreen(),
+                              builder: (context) => const BookingFlowScreen(),
                             ),
                           );
                         },
                       ),
                       MenuCard(
                         title: "Check Order Status",
-                        description: "Track your current laundry orders.",
+                        description: "Track your laundry orders and history.",
                         icon: Icons.track_changes,
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const OrderStatusScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                      MenuCard(
-                        title: "View Order History",
-                        description: "See your past orders and receipts.",
-                        icon: Icons.history,
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const OrderHistoryScreen(),
+                              builder: (context) => const OrdersScreen(),
                             ),
                           );
                         },

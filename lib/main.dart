@@ -3,7 +3,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:ilaba/providers/auth_provider.dart';
+import 'package:ilaba/providers/booking_state_provider.dart';
 import 'package:ilaba/services/auth_service.dart';
+import 'package:ilaba/services/pos_service_impl.dart';
 import 'package:ilaba/screens/login_screen.dart';
 import 'package:ilaba/screens/home_menu_screen.dart';
 
@@ -46,6 +48,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<AuthProvider>(
           create: (context) =>
               AuthProvider(authService: context.read<AuthService>()),
+        ),
+        ChangeNotifierProvider<BookingStateNotifier>(
+          create: (_) => BookingStateNotifier(SupabasePOSService()),
         ),
       ],
       child: MaterialApp(
