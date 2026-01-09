@@ -126,7 +126,7 @@ class _BookingProductsScreenState extends State<BookingProductsScreen> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          'Per ${product.unit}',
+                                          'PHP ${product.unitPrice.toStringAsFixed(2)}',
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: Colors.grey[600],

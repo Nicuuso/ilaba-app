@@ -406,7 +406,7 @@ class BookingStateNotifier extends ChangeNotifier {
     );
   }
 
-  /// Save order to backend
+  /// Save order to backend with new JSON structure
   Future<String?> saveOrder() async {
     if (isProcessing) return null;
     isProcessing = true;
@@ -415,119 +415,181 @@ class BookingStateNotifier extends ChangeNotifier {
     try {
       final receipt = computeReceipt();
 
-      // Prepare order payload matching the web API format
-      final orderData = {
-        'customerId': customer?.id,
-        'total': receipt.total,
-        'baskets': baskets.map((b) {
-          final serviceTypes = ['wash', 'dry', 'spin', 'iron', 'fold'];
-          final premiumMap = {
-            'wash': b.washPremium,
-            'dry': b.dryPremium,
-            'spin': false,
-            'iron': false,
-            'fold': false,
-          };
+      if (customer?.id == null) {
+        throw Exception('Customer not selected');
+      }
 
-          final basketServices = serviceTypes
-              .map((type) {
-                late int count;
-                late bool isActive;
-
-                switch (type) {
-                  case 'wash':
-                    count = b.washCount;
-                    isActive = count > 0;
-                  case 'dry':
-                    count = b.dryCount;
-                    isActive = count > 0;
-                  case 'spin':
-                    count = b.spinCount;
-                    isActive = count > 0;
-                  case 'iron':
-                    isActive = b.iron;
-                    count = b.iron ? 1 : 0;
-                  case 'fold':
-                    isActive = b.fold;
-                    count = b.fold ? 1 : 0;
-                  default:
-                    isActive = false;
-                    count = 0;
-                }
-
-                if (!isActive) return null;
-
-                final service = getServiceByType(
-                  type,
-                  premiumMap[type] ?? false,
-                );
-                if (service == null) return null;
-
-                final subtotal = (service.ratePerKg * b.weightKg * count);
-
-                return {
-                  'service_id': service.id,
-                  'rate': service.ratePerKg,
-                  'subtotal': subtotal,
-                };
-              })
-              .whereType<Map<String, dynamic>>()
-              .toList();
-
-          return {
-            'machine_id': b.machineId,
-            'weight': b.weightKg,
-            'notes': b.notes.isNotEmpty ? b.notes : null,
-            'subtotal': receipt.basketLines
-                .firstWhere(
-                  (bl) => bl.id == b.id,
-                  orElse: () => throw Exception('Basket not found'),
-                )
-                .total,
-            'services': basketServices,
-          };
-        }).toList(),
-        'products': orderProductCounts.entries.map((entry) {
+      // Build breakdown JSON structure
+      final breakdownJson = {
+        'items': orderProductCounts.entries.map((entry) {
           final product = products.firstWhere((p) => p.id == entry.key);
+          final subtotal = product.unitPrice * entry.value;
           return {
+            'id': 'item_${entry.key}_${DateTime.now().millisecondsSinceEpoch}',
             'product_id': entry.key,
+            'product_name': product.itemName,
             'quantity': entry.value,
+            'unit_cost': product.unitCost ?? 0,
             'unit_price': product.unitPrice,
-            'subtotal': product.unitPrice * entry.value,
+            'subtotal': subtotal,
           };
         }).toList(),
-        'payments': [
+        'baskets': baskets.map((b) {
+          final basketServices = <Map<String, dynamic>>[];
+
+          // Build services array for this basket
+          final serviceTypes = {
+            'wash': b.washCount,
+            'dry': b.dryCount,
+            'spin': b.spinCount,
+            'iron': b.iron ? 1 : 0,
+            'fold': b.fold ? 1 : 0,
+          };
+
+          serviceTypes.forEach((type, count) {
+            if (count > 0) {
+              final service = getServiceByType(
+                type,
+                (type == 'wash' && b.washPremium) ||
+                    (type == 'dry' && b.dryPremium),
+              );
+              if (service != null) {
+                final subtotal = service.ratePerKg * b.weightKg * count;
+                basketServices.add({
+                  'id':
+                      'svc_${type}_${b.id}_${DateTime.now().millisecondsSinceEpoch}',
+                  'service_id': service.id,
+                  'service_name': service.name,
+                  'is_premium':
+                      (type == 'wash' && b.washPremium) ||
+                      (type == 'dry' && b.dryPremium),
+                  'multiplier': count,
+                  'rate_per_kg': service.ratePerKg,
+                  'subtotal': subtotal,
+                  'status': 'pending',
+                  'started_at': null,
+                  'completed_at': null,
+                  'completed_by': null,
+                  'duration_in_minutes': null,
+                });
+              }
+            }
+          });
+
+          final basketLine = receipt.basketLines.firstWhere(
+            (bl) => bl.id == b.id,
+          );
+
+          return {
+            'basket_number': baskets.indexOf(b) + 1,
+            'weight': b.weightKg,
+            'basket_notes': b.notes.isNotEmpty ? b.notes : null,
+            'services': basketServices,
+            'total': basketLine.total,
+          };
+        }).toList(),
+        'fees': <Map<String, dynamic>>[
+          if (handling.deliver)
+            {
+              'id': 'fee_delivery_${DateTime.now().millisecondsSinceEpoch}',
+              'type': 'handling_fee',
+              'description': 'Delivery Fee',
+              'amount': handling.deliveryFee,
+            },
+        ],
+        'discounts': <Map<String, dynamic>>[],
+        'summary': {
+          'subtotal_products': receipt.productSubtotal,
+          'subtotal_services': receipt.basketSubtotal,
+          'handling': handling.deliver ? handling.deliveryFee : 0,
+          'service_fee': 0,
+          'discounts': 0,
+          'vat_rate': 0.12,
+          'vat_amount': receipt.taxIncluded,
+          'vat_model': 'inclusive',
+          'grand_total': receipt.total,
+        },
+        'payment': {
+          'method': payment.method,
+          'amount_paid': receipt.total,
+          'change': 0,
+          'reference_number': payment.referenceNumber,
+          'payment_status': 'successful',
+          'completed_at': DateTime.now().toIso8601String(),
+        },
+        'audit_log': <Map<String, dynamic>>[
           {
-            'amount': receipt.total,
-            'method': payment.method,
-            'reference': payment.referenceNumber,
+            'action': 'created',
+            'timestamp': DateTime.now().toIso8601String(),
+            'changed_by': null, // Mobile app - no staff user
+            'details': {'source': 'mobile_app'},
           },
         ],
-        'pickupAddress': handling.pickup
-            ? handling.pickupAddress.isNotEmpty
-                  ? handling.pickupAddress
-                  : null
-            : null,
-        'deliveryAddress': handling.deliver
-            ? handling.deliveryAddress.isNotEmpty
-                  ? handling.deliveryAddress
-                  : null
-            : null,
-        'shippingFee': handling.deliver ? handling.deliveryFee : 0,
       };
 
-      // Call service to save order (will use the unified API)
+      // Build handling JSON structure
+      final handlingJson = {
+        'pickup': {
+          'address': handling.pickupAddress.isNotEmpty
+              ? handling.pickupAddress
+              : null,
+          'latitude': null,
+          'longitude': null,
+          'notes': handling.instructions.isNotEmpty
+              ? handling.instructions
+              : null,
+          'status': 'pending',
+          'started_at': null,
+          'completed_at': null,
+          'completed_by': null,
+          'duration_in_minutes': null,
+        },
+        'delivery': handling.deliver
+            ? {
+                'address': handling.deliveryAddress.isNotEmpty
+                    ? handling.deliveryAddress
+                    : null,
+                'latitude': null,
+                'longitude': null,
+                'notes': null,
+                'status': 'pending',
+                'started_at': null,
+                'completed_at': null,
+                'completed_by': null,
+                'duration_in_minutes': null,
+              }
+            : null,
+      };
+
+      // Build final order payload matching new schema
+      final orderData = {
+        'source': 'app',
+        'customer_id': customer!.id,
+        'cashier_id': null, // Mobile orders don't have cashier
+        'status': 'pending',
+        'total_amount': receipt.total,
+        'order_note': handling.instructions.isNotEmpty
+            ? handling.instructions
+            : null,
+        'handling': handlingJson,
+        'breakdown': breakdownJson,
+        'cancellation': null,
+      };
+
+      debugPrint('📦 Saving order with structure: ${orderData.toString()}');
+
+      // Call service to save order
       final orderId = await _posService.saveOrder(orderData);
 
-      // Reset state
+      debugPrint('✅ Order saved successfully: $orderId');
       resetBooking();
 
       return orderId;
     } catch (e) {
-      debugPrint('Save order error: $e');
+      debugPrint('❌ Save order error: $e');
       isProcessing = false;
       notifyListeners();
-      return null;
+      rethrow;
     }
   }
 

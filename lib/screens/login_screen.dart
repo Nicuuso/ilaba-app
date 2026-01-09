@@ -59,7 +59,8 @@ class _LoginScreenState extends State<LoginScreen> {
       debugPrint('✅ Login successful');
       Navigator.of(context).pushReplacementNamed('/home');
     } else if (mounted) {
-      final errorMsg = authProvider.errorMessage ?? 'Login failed. Please try again.';
+      final errorMsg =
+          authProvider.errorMessage ?? 'Login failed. Please try again.';
       debugPrint('❌ Login failed: $errorMsg');
       _showErrorSnackbar(errorMsg);
     }

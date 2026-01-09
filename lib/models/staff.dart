@@ -1,21 +1,20 @@
-import 'package:flutter/foundation.dart';
-
-class User {
+class Staff {
   final String id;
   final String? authId;
   final String firstName;
   final String? middleName;
   final String lastName;
-  final DateTime birthdate; // NOW REQUIRED
-  final String gender; // NOW REQUIRED: 'male', 'female', 'other'
-  final String? address;
-  final String phoneNumber; // NOW REQUIRED
-  final String? emailAddress;
-  final int? loyaltyPoints;
+  final DateTime birthdate;
+  final String gender; // 'male', 'female', 'other'
+  final String address;
+  final String phoneNumber;
+  final String emailAddress;
+  final bool isActive;
+  final String? updatedBy;
   final DateTime? createdAt;
-  final DateTime? updatedAt; // NEW
+  final DateTime? updatedAt;
 
-  User({
+  Staff({
     required this.id,
     this.authId,
     required this.firstName,
@@ -23,37 +22,29 @@ class User {
     required this.lastName,
     required this.birthdate,
     required this.gender,
-    this.address,
+    required this.address,
     required this.phoneNumber,
-    this.emailAddress,
-    this.loyaltyPoints,
+    required this.emailAddress,
+    this.isActive = true,
+    this.updatedBy,
     this.createdAt,
     this.updatedAt,
   });
 
-  factory User.fromJson(Map<String, dynamic> json) {
-    // Handle null birthdate and gender gracefully (for legacy data)
-    DateTime? parsedBirthdate;
-    if (json['birthdate'] != null && json['birthdate'].toString().isNotEmpty) {
-      try {
-        parsedBirthdate = DateTime.parse(json['birthdate'] as String);
-      } catch (e) {
-        debugPrint('⚠️ Failed to parse birthdate: ${json['birthdate']}');
-      }
-    }
-
-    return User(
+  factory Staff.fromJson(Map<String, dynamic> json) {
+    return Staff(
       id: json['id'] as String,
       authId: json['auth_id'] as String?,
       firstName: json['first_name'] as String,
       middleName: json['middle_name'] as String?,
       lastName: json['last_name'] as String,
-      birthdate: parsedBirthdate ?? DateTime(1990, 1, 1), // Fallback date
-      gender: json['gender'] as String? ?? 'other', // Fallback to 'other'
-      address: json['address'] as String?,
+      birthdate: DateTime.parse(json['birthdate'] as String),
+      gender: json['gender'] as String,
+      address: json['address'] as String,
       phoneNumber: json['phone_number'] as String,
-      emailAddress: json['email_address'] as String?,
-      loyaltyPoints: json['loyalty_points'] as int?,
+      emailAddress: json['email_address'] as String,
+      isActive: json['is_active'] as bool? ?? true,
+      updatedBy: json['updated_by'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,
@@ -75,13 +66,18 @@ class User {
       'address': address,
       'phone_number': phoneNumber,
       'email_address': emailAddress,
-      'loyalty_points': loyaltyPoints,
+      'is_active': isActive,
+      'updated_by': updatedBy,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };
   }
 
-  User copyWith({
+  String getDisplayName() {
+    return '$firstName $lastName';
+  }
+
+  Staff copyWith({
     String? id,
     String? authId,
     String? firstName,
@@ -92,11 +88,12 @@ class User {
     String? address,
     String? phoneNumber,
     String? emailAddress,
-    int? loyaltyPoints,
+    bool? isActive,
+    String? updatedBy,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
-    return User(
+    return Staff(
       id: id ?? this.id,
       authId: authId ?? this.authId,
       firstName: firstName ?? this.firstName,
@@ -107,7 +104,8 @@ class User {
       address: address ?? this.address,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       emailAddress: emailAddress ?? this.emailAddress,
-      loyaltyPoints: loyaltyPoints ?? this.loyaltyPoints,
+      isActive: isActive ?? this.isActive,
+      updatedBy: updatedBy ?? this.updatedBy,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

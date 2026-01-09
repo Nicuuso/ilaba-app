@@ -45,7 +45,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen>
     try {
       final supabase = Supabase.instance.client;
 
-      // Fetch active orders (not completed or cancelled)
+      // Fetch active orders (not completed or cancelled) - new JSON-based schema
       final orders = await supabase
           .from('orders')
           .select()
@@ -54,34 +54,11 @@ class _OrderStatusScreenState extends State<OrderStatusScreen>
           .neq('status', 'cancelled')
           .order('created_at', ascending: false);
 
-      // Enrich each order with baskets and services
-      List<Map<String, dynamic>> enrichedOrders = [];
-
-      for (var order in orders) {
-        final orderId = order['id'];
-
-        // Fetch baskets for this order
-        final baskets = await supabase
-            .from('baskets')
-            .select()
-            .eq('order_id', orderId);
-
-        List<Map<String, dynamic>> basketsWithServices = [];
-        for (var basket in baskets) {
-          final basketServices = await supabase
-              .from('basket_services')
-              .select('*, services(id, name, description)')
-              .eq('basket_id', basket['id']);
-
-          basketsWithServices.add({...basket, 'services': basketServices});
-        }
-
-        enrichedOrders.add({...order, 'baskets': basketsWithServices});
-      }
-
-      return enrichedOrders;
+      // Orders now have all data in JSON columns (breakdown, handling)
+      // No need for additional fetches
+      return orders.cast<Map<String, dynamic>>();
     } catch (e) {
-      debugPrint('Error fetching active orders: $e');
+      debugPrint('❌ Error fetching active orders: $e');
       rethrow;
     }
   }
@@ -233,7 +210,11 @@ class _OrderStatusScreenState extends State<OrderStatusScreen>
               final order = orders[index];
               final orderId = order['id'];
               final status = order['status'] ?? 'processing';
-              final baskets = order['baskets'] as List? ?? [];
+
+              // Extract data from JSON columns
+              final breakdown =
+                  order['breakdown'] as Map<String, dynamic>? ?? {};
+              final baskets = (breakdown['baskets'] as List?) ?? [];
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -310,9 +291,14 @@ class _OrderStatusScreenState extends State<OrderStatusScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             ...List.generate(baskets.length, (basketIndex) {
-                              final basket = baskets[basketIndex];
+                              final basketJson =
+                                  baskets[basketIndex] as Map<String, dynamic>;
+                              final basketNumber =
+                                  basketJson['basket_number'] ??
+                                  basketIndex + 1;
                               final basketServices =
-                                  basket['services'] as List? ?? [];
+                                  (basketJson['services'] as List?) ?? [];
+                              final weight = basketJson['weight'] ?? 0;
 
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,7 +328,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen>
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
-                                        'Basket #${basket['basket_number']}',
+                                        'Basket #$basketNumber ($weight kg)',
                                         style: Theme.of(context)
                                             .textTheme
                                             .labelLarge
@@ -358,22 +344,18 @@ class _OrderStatusScreenState extends State<OrderStatusScreen>
                                         ),
                                         decoration: BoxDecoration(
                                           color: _getStatusColor(
-                                            basket['status'],
+                                            'pending', // Services are still pending in new orders
                                           ).withOpacity(0.12),
                                           borderRadius: BorderRadius.circular(
                                             6,
                                           ),
                                         ),
                                         child: Text(
-                                          (basket['status'] ?? 'N/A')
-                                              .toString()
-                                              .toUpperCase(),
+                                          'PROCESSING',
                                           style: TextStyle(
                                             fontSize: 10,
                                             fontWeight: FontWeight.w600,
-                                            color: _getStatusColor(
-                                              basket['status'],
-                                            ),
+                                            color: _getStatusColor('pending'),
                                           ),
                                         ),
                                       ),
@@ -387,17 +369,18 @@ class _OrderStatusScreenState extends State<OrderStatusScreen>
                                       children: List.generate(basketServices.length, (
                                         serviceIndex,
                                       ) {
-                                        final service =
-                                            basketServices[serviceIndex];
+                                        final svc =
+                                            basketServices[serviceIndex]
+                                                as Map<String, dynamic>;
                                         final serviceName =
-                                            service['services']?['name'] ??
+                                            svc['service_name'] ??
                                             'Unknown Service';
                                         final serviceStatus =
-                                            service['status'] ?? 'pending';
+                                            svc['status'] ?? 'pending';
                                         final isCompleted =
                                             serviceStatus == 'completed';
-                                        final isInProgress =
-                                            serviceStatus == 'in_progress';
+                                        final isPremium =
+                                            svc['is_premium'] ?? false;
 
                                         return Padding(
                                           padding: const EdgeInsets.only(
@@ -486,7 +469,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen>
                                                         children: [
                                                           Expanded(
                                                             child: Text(
-                                                              serviceName,
+                                                              '${serviceName}${isPremium ? ' (Premium)' : ''}',
                                                               style: Theme.of(context)
                                                                   .textTheme
                                                                   .bodySmall
@@ -498,54 +481,44 @@ class _OrderStatusScreenState extends State<OrderStatusScreen>
                                                                       context,
                                                                     ).colorScheme.onSurface,
                                                                   ),
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
                                                             ),
                                                           ),
-                                                          const SizedBox(
-                                                            width: 8,
+                                                          Text(
+                                                            '₱${(svc['subtotal'] ?? 0).toStringAsFixed(2)}',
+                                                            style: Theme.of(context)
+                                                                .textTheme
+                                                                .bodySmall
+                                                                ?.copyWith(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  color: Theme.of(
+                                                                    context,
+                                                                  ).colorScheme.primary,
+                                                                ),
                                                           ),
-                                                          if (isInProgress)
-                                                            SizedBox(
-                                                              width: 14,
-                                                              height: 14,
-                                                              child: CircularProgressIndicator(
-                                                                strokeWidth: 2,
-                                                                valueColor:
-                                                                    AlwaysStoppedAnimation<
-                                                                      Color
-                                                                    >(
-                                                                      _getStatusColor(
-                                                                        serviceStatus,
-                                                                      ),
-                                                                    ),
-                                                              ),
-                                                            ),
-                                                          if (isCompleted)
-                                                            Icon(
-                                                              Icons
-                                                                  .check_circle,
-                                                              size: 14,
-                                                              color:
-                                                                  _getStatusColor(
-                                                                    serviceStatus,
-                                                                  ),
-                                                            ),
                                                         ],
                                                       ),
-                                                      const SizedBox(height: 6),
-                                                      Text(
-                                                        'Amount: ₱${service['subtotal']}',
-                                                        style: Theme.of(context)
-                                                            .textTheme
-                                                            .labelSmall
-                                                            ?.copyWith(
-                                                              color: Theme.of(context)
-                                                                  .colorScheme
-                                                                  .onSurfaceVariant,
-                                                            ),
-                                                      ),
+                                                      if (svc['rate_per_kg'] !=
+                                                          null)
+                                                        Padding(
+                                                          padding:
+                                                              const EdgeInsets.only(
+                                                                top: 4.0,
+                                                              ),
+                                                          child: Text(
+                                                            '${svc['multiplier'] ?? 1}x @ ₱${(svc['rate_per_kg'] ?? 0).toStringAsFixed(2)}/kg',
+                                                            style: Theme.of(context)
+                                                                .textTheme
+                                                                .bodySmall
+                                                                ?.copyWith(
+                                                                  color: Theme.of(
+                                                                    context,
+                                                                  ).colorScheme.onSurfaceVariant,
+                                                                  fontSize: 11,
+                                                                ),
+                                                          ),
+                                                        ),
                                                     ],
                                                   ),
                                                 ),

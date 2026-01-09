@@ -1,22 +1,45 @@
 class Product {
   final String id;
   final String itemName;
-  final String unit;
   final double unitPrice;
+  final double quantity;
+  final double? reorderLevel;
+  final double? unitCost;
+  final bool isActive;
+  final DateTime? createdAt;
+  final DateTime? lastUpdated;
 
   Product({
     required this.id,
     required this.itemName,
-    required this.unit,
     required this.unitPrice,
+    this.quantity = 0,
+    this.reorderLevel = 0,
+    this.unitCost = 0,
+    this.isActive = true,
+    this.createdAt,
+    this.lastUpdated,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
       id: json['id'] ?? '',
       itemName: json['item_name'] ?? '',
-      unit: json['unit'] ?? '',
       unitPrice: (json['unit_price'] ?? 0).toDouble(),
+      quantity: (json['quantity'] ?? 0).toDouble(),
+      reorderLevel: json['reorder_level'] != null
+          ? (json['reorder_level'] as num).toDouble()
+          : 0,
+      unitCost: json['unit_cost'] != null
+          ? (json['unit_cost'] as num).toDouble()
+          : 0,
+      isActive: json['is_active'] ?? true,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : null,
+      lastUpdated: json['last_updated'] != null
+          ? DateTime.parse(json['last_updated'] as String)
+          : null,
     );
   }
 
@@ -24,8 +47,13 @@ class Product {
     return {
       'id': id,
       'item_name': itemName,
-      'unit': unit,
       'unit_price': unitPrice,
+      'quantity': quantity,
+      'reorder_level': reorderLevel,
+      'unit_cost': unitCost,
+      'is_active': isActive,
+      'created_at': createdAt?.toIso8601String(),
+      'last_updated': lastUpdated?.toIso8601String(),
     };
   }
 }

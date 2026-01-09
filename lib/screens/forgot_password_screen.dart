@@ -60,14 +60,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       _showSuccessSnackbar(
         'Password reset link sent to $email. Check your inbox.',
       );
-      
+
       // Auto-return to login after 3 seconds
       await Future.delayed(const Duration(seconds: 3));
       if (mounted) {
         Navigator.of(context).pop();
       }
     } else if (mounted) {
-      final errorMsg = authProvider.errorMessage ?? 'Failed to send reset link. Please try again.';
+      final errorMsg =
+          authProvider.errorMessage ??
+          'Failed to send reset link. Please try again.';
       debugPrint('❌ Password reset failed: $errorMsg');
       _showErrorSnackbar(errorMsg);
     }
@@ -102,10 +104,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Reset Password'),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Reset Password'), elevation: 0),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -113,7 +112,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 20),
-              
+
               // Header
               Text(
                 'Forgot Your Password?',
@@ -124,7 +123,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
-              
+
               Text(
                 'Enter your email address and we\'ll send you a link to reset your password.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -163,19 +162,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ),
                     child: authProvider.isLoading
                         ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
-                        )
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
                         : Text(
-                          _resetSent ? 'Link Sent - Redirecting...' : 'Send Reset Link',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                            _resetSent
+                                ? 'Link Sent - Redirecting...'
+                                : 'Send Reset Link',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
                   );
                 },
               ),

@@ -111,7 +111,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       debugPrint('✅ Signup successful');
       Navigator.of(context).pushReplacementNamed('/home');
     } else if (mounted) {
-      final errorMsg = authProvider.errorMessage ?? 'Signup failed. Please try again.';
+      final errorMsg =
+          authProvider.errorMessage ?? 'Signup failed. Please try again.';
       debugPrint('❌ Signup failed: $errorMsg');
       _showErrorSnackbar(errorMsg);
     }
@@ -302,7 +303,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   prefixIcon: const Icon(Icons.lock_outlined),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _passwordVisible ? Icons.visibility : Icons.visibility_off,
+                      _passwordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -361,12 +364,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     child: authProvider.isLoading
                         ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
-                        )
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
                         : const Text('Sign Up'),
                   );
                 },
