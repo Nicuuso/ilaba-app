@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:ilaba/providers/auth_provider.dart';
 import 'package:ilaba/screens/signup_screen.dart';
@@ -34,21 +35,43 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
+    // Validation
     if (email.isEmpty || password.isEmpty) {
       _showErrorSnackbar('Please enter email and password');
       return;
     }
 
+    if (!_isValidEmail(email)) {
+      _showErrorSnackbar('Please enter a valid email address');
+      return;
+    }
+
+    if (password.length < 6) {
+      _showErrorSnackbar('Password must be at least 6 characters');
+      return;
+    }
+
+    debugPrint('🔐 Attempting login with: $email');
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.login(email, password);
 
     if (success && mounted) {
+      debugPrint('✅ Login successful');
       Navigator.of(context).pushReplacementNamed('/home');
     } else if (mounted) {
-      _showErrorSnackbar(
-        authProvider.errorMessage ?? 'Login failed. Please try again.',
-      );
+      final errorMsg = authProvider.errorMessage ?? 'Login failed. Please try again.';
+      debugPrint('❌ Login failed: $errorMsg');
+      _showErrorSnackbar(errorMsg);
     }
+  }
+
+  bool _isValidEmail(String email) {
+    // Simple email validation - accepts most valid email formats
+    // Allows: alphanumeric, dots, plus signs, underscores, hyphens
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
+    return emailRegex.hasMatch(email);
   }
 
   void _showErrorSnackbar(String message) {

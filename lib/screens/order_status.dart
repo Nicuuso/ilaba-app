@@ -14,7 +14,6 @@ class _OrderStatusScreenState extends State<OrderStatusScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
   late Future<List<Map<String, dynamic>>> _activeOrdersFuture;
-  late Future<List<Map<String, dynamic>>> _orderHistoryFuture;
 
   @override
   void initState() {
@@ -35,10 +34,8 @@ class _OrderStatusScreenState extends State<OrderStatusScreen>
 
     if (customerId != null) {
       _activeOrdersFuture = _fetchActiveOrders(customerId);
-      _orderHistoryFuture = _fetchOrderHistory(customerId);
     } else {
       _activeOrdersFuture = Future.value([]);
-      _orderHistoryFuture = Future.value([]);
     }
   }
 
@@ -85,61 +82,6 @@ class _OrderStatusScreenState extends State<OrderStatusScreen>
       return enrichedOrders;
     } catch (e) {
       debugPrint('Error fetching active orders: $e');
-      rethrow;
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> _fetchOrderHistory(
-    String customerId,
-  ) async {
-    try {
-      final supabase = Supabase.instance.client;
-
-      // Fetch all orders for the customer (including completed and cancelled)
-      final orders = await supabase
-          .from('orders')
-          .select()
-          .eq('customer_id', customerId)
-          .order('created_at', ascending: false);
-
-      // Enrich each order with baskets and services
-      List<Map<String, dynamic>> enrichedOrders = [];
-
-      for (var order in orders) {
-        final orderId = order['id'];
-
-        // Fetch payments
-        final payments = await supabase
-            .from('payments')
-            .select()
-            .eq('order_id', orderId);
-
-        // Fetch baskets for this order
-        final baskets = await supabase
-            .from('baskets')
-            .select()
-            .eq('order_id', orderId);
-
-        List<Map<String, dynamic>> basketsWithServices = [];
-        for (var basket in baskets) {
-          final basketServices = await supabase
-              .from('basket_services')
-              .select('*, services(id, name, description)')
-              .eq('basket_id', basket['id']);
-
-          basketsWithServices.add({...basket, 'services': basketServices});
-        }
-
-        enrichedOrders.add({
-          ...order,
-          'payments': payments,
-          'baskets': basketsWithServices,
-        });
-      }
-
-      return enrichedOrders;
-    } catch (e) {
-      debugPrint('Error fetching order history: $e');
       rethrow;
     }
   }

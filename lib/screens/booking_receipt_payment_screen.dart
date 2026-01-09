@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ilaba/providers/booking_state_provider.dart';
-import 'package:ilaba/widgets/custom_text_field.dart';
 
 class BookingReceiptPaymentScreen extends StatefulWidget {
   const BookingReceiptPaymentScreen({Key? key}) : super(key: key);

@@ -43,7 +43,12 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _errorMessage = e.toString();
+      // Extract clean error message, removing Exception: prefix
+      String errorMsg = e.toString();
+      if (errorMsg.startsWith('Exception: ')) {
+        errorMsg = errorMsg.substring(10);
+      }
+      _errorMessage = errorMsg;
       _isLoading = false;
       notifyListeners();
       return false;
@@ -56,7 +61,10 @@ class AuthProvider extends ChangeNotifier {
     required String lastName,
     required String email,
     required String phoneNumber,
-    required String address,
+    required DateTime birthdate,
+    required String gender,
+    String? middleName,
+    String? address,
     required String password,
   }) async {
     _isLoading = true;
@@ -69,6 +77,9 @@ class AuthProvider extends ChangeNotifier {
         lastName: lastName,
         email: email,
         phoneNumber: phoneNumber,
+        birthdate: birthdate,
+        gender: gender,
+        middleName: middleName,
         address: address,
         password: password,
       );
@@ -77,7 +88,11 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _errorMessage = e.toString();
+      String errorMsg = e.toString();
+      if (errorMsg.startsWith('Exception: ')) {
+        errorMsg = errorMsg.substring(10);
+      }
+      _errorMessage = errorMsg;
       _isLoading = false;
       notifyListeners();
       return false;
@@ -96,7 +111,11 @@ class AuthProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      _errorMessage = e.toString();
+      String errorMsg = e.toString();
+      if (errorMsg.startsWith('Exception: ')) {
+        errorMsg = errorMsg.substring(10);
+      }
+      _errorMessage = errorMsg;
       _isLoading = false;
       notifyListeners();
     }
@@ -114,7 +133,11 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _errorMessage = e.toString();
+      String errorMsg = e.toString();
+      if (errorMsg.startsWith('Exception: ')) {
+        errorMsg = errorMsg.substring(10);
+      }
+      _errorMessage = errorMsg;
       _isLoading = false;
       notifyListeners();
       return false;
