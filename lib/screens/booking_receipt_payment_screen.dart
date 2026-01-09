@@ -507,7 +507,9 @@ class _BookingReceiptPaymentScreenState
                               if (orderId != null) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('✅ Order placed! ID: $orderId'),
+                                    content: Text(
+                                      '✅ Order placed! ID: $orderId',
+                                    ),
                                     backgroundColor: Colors.green,
                                     duration: const Duration(seconds: 5),
                                   ),
@@ -515,7 +517,9 @@ class _BookingReceiptPaymentScreenState
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('❌ Failed to place order - see console for details'),
+                                    content: Text(
+                                      '❌ Failed to place order - see console for details',
+                                    ),
                                     backgroundColor: Colors.red,
                                     duration: const Duration(seconds: 5),
                                   ),
@@ -538,8 +542,9 @@ class _BookingReceiptPaymentScreenState
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         )
                       : const Text('Confirm'),
@@ -561,10 +566,7 @@ class _BookingReceiptPaymentScreenState
           content: SingleChildScrollView(
             child: SelectableText(
               error,
-              style: const TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 12,
-              ),
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
             ),
           ),
           actions: [

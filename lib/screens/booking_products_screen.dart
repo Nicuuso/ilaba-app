@@ -31,9 +31,11 @@ class _BookingProductsScreenState extends State<BookingProductsScreen> {
       builder: (context, state, _) {
         // Filter products based on search
         final filteredProducts = state.products
-            .where((product) => product.itemName
-                .toLowerCase()
-                .contains(_searchController.text.toLowerCase()))
+            .where(
+              (product) => product.itemName.toLowerCase().contains(
+                _searchController.text.toLowerCase(),
+              ),
+            )
             .toList();
 
         return SingleChildScrollView(
@@ -67,8 +69,11 @@ class _BookingProductsScreenState extends State<BookingProductsScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 32),
                       child: Column(
                         children: [
-                          Icon(Icons.shopping_bag_outlined,
-                              size: 48, color: Colors.grey[400]),
+                          Icon(
+                            Icons.shopping_bag_outlined,
+                            size: 48,
+                            color: Colors.grey[400],
+                          ),
                           const SizedBox(height: 12),
                           Text(
                             _searchController.text.isEmpty
@@ -131,8 +136,7 @@ class _BookingProductsScreenState extends State<BookingProductsScreen> {
                                     ),
                                   ),
                                   Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.end,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
                                       Text(
                                         '₱${product.unitPrice.toStringAsFixed(2)}',
@@ -144,16 +148,16 @@ class _BookingProductsScreenState extends State<BookingProductsScreen> {
                                       ),
                                       if (quantity > 0)
                                         Container(
-                                          margin:
-                                              const EdgeInsets.only(top: 4),
+                                          margin: const EdgeInsets.only(top: 4),
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 8,
                                             vertical: 2,
                                           ),
                                           decoration: BoxDecoration(
                                             color: Colors.blue,
-                                            borderRadius:
-                                                BorderRadius.circular(4),
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
                                           ),
                                           child: Text(
                                             'Qty: $quantity',
@@ -236,8 +240,9 @@ class _BookingProductsScreenState extends State<BookingProductsScreen> {
                         ),
                         const SizedBox(height: 8),
                         ...state.orderProductCounts.entries.map((entry) {
-                          final product = state.products
-                              .firstWhere((p) => p.id == entry.key);
+                          final product = state.products.firstWhere(
+                            (p) => p.id == entry.key,
+                          );
                           final subtotal = product.unitPrice * entry.value;
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4),
@@ -273,14 +278,10 @@ class _BookingProductsScreenState extends State<BookingProductsScreen> {
                               ),
                             ),
                             Text(
-                              '₱${state.orderProductCounts.entries.fold<double>(
-                                    0,
-                                    (sum, entry) {
-                                      final product = state.products
-                                          .firstWhere((p) => p.id == entry.key);
-                                      return sum + (product.unitPrice * entry.value);
-                                    },
-                                  ).toStringAsFixed(2)}',
+                              '₱${state.orderProductCounts.entries.fold<double>(0, (sum, entry) {
+                                final product = state.products.firstWhere((p) => p.id == entry.key);
+                                return sum + (product.unitPrice * entry.value);
+                              }).toStringAsFixed(2)}',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,

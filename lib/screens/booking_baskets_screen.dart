@@ -37,15 +37,15 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.shopping_basket_outlined,
-                      size: 48, color: Colors.grey[400]),
+                  Icon(
+                    Icons.shopping_basket_outlined,
+                    size: 48,
+                    color: Colors.grey[400],
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     'No baskets added yet',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
@@ -180,7 +180,9 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
                       _CompactButton(
                         icon: Icons.add,
                         onPressed: () {
-                          context.read<BookingStateNotifier>().updateActiveBasket(
+                          context
+                              .read<BookingStateNotifier>()
+                              .updateActiveBasket(
                                 activeBasket.copyWith(
                                   weightKg: activeBasket.weightKg + 0.5,
                                 ),
@@ -196,10 +198,7 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
                 // Services section - Expandable list
                 const Text(
                   'Services',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
 
@@ -212,22 +211,24 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
                   serviceType: 'wash',
                   onIncrement: () {
                     context.read<BookingStateNotifier>().updateActiveBasket(
-                          activeBasket.copyWith(
-                              washCount: activeBasket.washCount + 1),
-                        );
+                      activeBasket.copyWith(
+                        washCount: activeBasket.washCount + 1,
+                      ),
+                    );
                   },
                   onDecrement: () {
                     if (activeBasket.washCount > 0) {
                       context.read<BookingStateNotifier>().updateActiveBasket(
-                            activeBasket.copyWith(
-                                washCount: activeBasket.washCount - 1),
-                          );
+                        activeBasket.copyWith(
+                          washCount: activeBasket.washCount - 1,
+                        ),
+                      );
                     }
                   },
                   onPremiumChanged: (value) {
                     context.read<BookingStateNotifier>().updateActiveBasket(
-                          activeBasket.copyWith(washPremium: value),
-                        );
+                      activeBasket.copyWith(washPremium: value),
+                    );
                   },
                   hasPremium: true,
                   disabled: activeBasket.weightKg == 0,
@@ -243,22 +244,24 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
                   serviceType: 'dry',
                   onIncrement: () {
                     context.read<BookingStateNotifier>().updateActiveBasket(
-                          activeBasket.copyWith(
-                              dryCount: activeBasket.dryCount + 1),
-                        );
+                      activeBasket.copyWith(
+                        dryCount: activeBasket.dryCount + 1,
+                      ),
+                    );
                   },
                   onDecrement: () {
                     if (activeBasket.dryCount > 0) {
                       context.read<BookingStateNotifier>().updateActiveBasket(
-                            activeBasket.copyWith(
-                                dryCount: activeBasket.dryCount - 1),
-                          );
+                        activeBasket.copyWith(
+                          dryCount: activeBasket.dryCount - 1,
+                        ),
+                      );
                     }
                   },
                   onPremiumChanged: (value) {
                     context.read<BookingStateNotifier>().updateActiveBasket(
-                          activeBasket.copyWith(dryPremium: value),
-                        );
+                      activeBasket.copyWith(dryPremium: value),
+                    );
                   },
                   hasPremium: true,
                   disabled: activeBasket.weightKg == 0,
@@ -274,16 +277,18 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
                   serviceType: 'spin',
                   onIncrement: () {
                     context.read<BookingStateNotifier>().updateActiveBasket(
-                          activeBasket.copyWith(
-                              spinCount: activeBasket.spinCount + 1),
-                        );
+                      activeBasket.copyWith(
+                        spinCount: activeBasket.spinCount + 1,
+                      ),
+                    );
                   },
                   onDecrement: () {
                     if (activeBasket.spinCount > 0) {
                       context.read<BookingStateNotifier>().updateActiveBasket(
-                            activeBasket.copyWith(
-                                spinCount: activeBasket.spinCount - 1),
-                          );
+                        activeBasket.copyWith(
+                          spinCount: activeBasket.spinCount - 1,
+                        ),
+                      );
                     }
                   },
                   onPremiumChanged: null,
@@ -301,13 +306,13 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
                   serviceType: 'iron',
                   onIncrement: () {
                     context.read<BookingStateNotifier>().updateActiveBasket(
-                          activeBasket.copyWith(iron: !activeBasket.iron),
-                        );
+                      activeBasket.copyWith(iron: !activeBasket.iron),
+                    );
                   },
                   onDecrement: () {
                     context.read<BookingStateNotifier>().updateActiveBasket(
-                          activeBasket.copyWith(iron: false),
-                        );
+                      activeBasket.copyWith(iron: false),
+                    );
                   },
                   onPremiumChanged: null,
                   hasPremium: false,
@@ -325,13 +330,13 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
                   serviceType: 'fold',
                   onIncrement: () {
                     context.read<BookingStateNotifier>().updateActiveBasket(
-                          activeBasket.copyWith(fold: !activeBasket.fold),
-                        );
+                      activeBasket.copyWith(fold: !activeBasket.fold),
+                    );
                   },
                   onDecrement: () {
                     context.read<BookingStateNotifier>().updateActiveBasket(
-                          activeBasket.copyWith(fold: false),
-                        );
+                      activeBasket.copyWith(fold: false),
+                    );
                   },
                   onPremiumChanged: null,
                   hasPremium: false,
@@ -349,8 +354,8 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
                   maxLines: 2,
                   onChanged: (value) {
                     context.read<BookingStateNotifier>().updateActiveBasket(
-                          activeBasket.copyWith(notes: value),
-                        );
+                      activeBasket.copyWith(notes: value),
+                    );
                   },
                 ),
 
@@ -395,15 +400,9 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
                           style: const TextStyle(fontSize: 12),
                         ),
                       if (activeBasket.iron)
-                        const Text(
-                          'Iron: ✓',
-                          style: TextStyle(fontSize: 12),
-                        ),
+                        const Text('Iron: ✓', style: TextStyle(fontSize: 12)),
                       if (activeBasket.fold)
-                        const Text(
-                          'Fold: ✓',
-                          style: TextStyle(fontSize: 12),
-                        ),
+                        const Text('Fold: ✓', style: TextStyle(fontSize: 12)),
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -442,10 +441,7 @@ class _CompactButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
 
-  const _CompactButton({
-    required this.icon,
-    required this.onPressed,
-  });
+  const _CompactButton({required this.icon, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -457,11 +453,7 @@ class _CompactButton extends StatelessWidget {
           color: Colors.blue,
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Icon(
-          icon,
-          size: 16,
-          color: Colors.white,
-        ),
+        child: Icon(icon, size: 16, color: Colors.white),
       ),
     );
   }
@@ -501,7 +493,9 @@ class _ServiceListItem extends StatelessWidget {
   double _getBasePrice() {
     try {
       final service = services.firstWhere(
-        (s) => s.serviceType == serviceType && !s.name.toLowerCase().contains('premium'),
+        (s) =>
+            s.serviceType == serviceType &&
+            !s.name.toLowerCase().contains('premium'),
       );
       return service.ratePerKg;
     } catch (e) {
@@ -521,7 +515,9 @@ class _ServiceListItem extends StatelessWidget {
   double _getPremiumPrice() {
     try {
       final service = services.firstWhere(
-        (s) => s.serviceType == serviceType && s.name.toLowerCase().contains('premium'),
+        (s) =>
+            s.serviceType == serviceType &&
+            s.name.toLowerCase().contains('premium'),
       );
       return service.ratePerKg;
     } catch (e) {
@@ -532,9 +528,7 @@ class _ServiceListItem extends StatelessWidget {
   /// Get base duration from services list
   int _getBaseDuration() {
     try {
-      final service = services.firstWhere(
-        (s) => s.serviceType == serviceType,
-      );
+      final service = services.firstWhere((s) => s.serviceType == serviceType);
       return service.baseDurationMinutes;
     } catch (e) {
       return 0;
@@ -642,7 +636,9 @@ class _ServiceListItem extends StatelessWidget {
               // Premium checkbox
               if (hasPremium)
                 GestureDetector(
-                  onTap: disabled ? null : () => onPremiumChanged?.call(!isPremium),
+                  onTap: disabled
+                      ? null
+                      : () => onPremiumChanged?.call(!isPremium),
                   child: Row(
                     children: [
                       SizedBox(
@@ -704,8 +700,8 @@ class _ControlButton extends StatelessWidget {
           color: onPressed == null
               ? Colors.grey[300]
               : isActive
-                  ? Colors.green
-                  : Colors.blue,
+              ? Colors.green
+              : Colors.blue,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(

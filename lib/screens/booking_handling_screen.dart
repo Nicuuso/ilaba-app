@@ -19,12 +19,15 @@ class _BookingHandlingScreenState extends State<BookingHandlingScreen> {
   void initState() {
     super.initState();
     final state = context.read<BookingStateNotifier>();
-    _pickupAddressController =
-        TextEditingController(text: state.handling.pickupAddress);
-    _deliveryAddressController =
-        TextEditingController(text: state.handling.deliveryAddress);
-    _instructionsController =
-        TextEditingController(text: state.handling.instructions);
+    _pickupAddressController = TextEditingController(
+      text: state.handling.pickupAddress,
+    );
+    _deliveryAddressController = TextEditingController(
+      text: state.handling.deliveryAddress,
+    );
+    _instructionsController = TextEditingController(
+      text: state.handling.instructions,
+    );
   }
 
   @override
@@ -67,8 +70,8 @@ class _BookingHandlingScreenState extends State<BookingHandlingScreen> {
                   maxLines: 2,
                   onChanged: (value) {
                     context.read<BookingStateNotifier>().setHandling(
-                          state.handling.copyWith(pickupAddress: value),
-                        );
+                      state.handling.copyWith(pickupAddress: value),
+                    );
                   },
                 ),
                 const SizedBox(height: 16),
@@ -89,8 +92,8 @@ class _BookingHandlingScreenState extends State<BookingHandlingScreen> {
                   maxLines: 2,
                   onChanged: (value) {
                     context.read<BookingStateNotifier>().setHandling(
-                          state.handling.copyWith(deliveryAddress: value),
-                        );
+                      state.handling.copyWith(deliveryAddress: value),
+                    );
                   },
                 ),
 
@@ -110,8 +113,8 @@ class _BookingHandlingScreenState extends State<BookingHandlingScreen> {
                   maxLines: 3,
                   onChanged: (value) {
                     context.read<BookingStateNotifier>().setHandling(
-                          state.handling.copyWith(instructions: value),
-                        );
+                      state.handling.copyWith(instructions: value),
+                    );
                   },
                 ),
 
@@ -141,7 +144,11 @@ class _BookingHandlingScreenState extends State<BookingHandlingScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.storefront, size: 18, color: Colors.green),
+                              Icon(
+                                Icons.storefront,
+                                size: 18,
+                                color: Colors.green,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Column(
@@ -175,7 +182,11 @@ class _BookingHandlingScreenState extends State<BookingHandlingScreen> {
                             children: [
                               Row(
                                 children: [
-                                  Icon(Icons.local_shipping, size: 18, color: Colors.green),
+                                  Icon(
+                                    Icons.local_shipping,
+                                    size: 18,
+                                    color: Colors.green,
+                                  ),
                                   const SizedBox(width: 8),
                                   const Text(
                                     'Delivery',
@@ -197,7 +208,10 @@ class _BookingHandlingScreenState extends State<BookingHandlingScreen> {
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.only(left: 26, top: 4),
+                                padding: const EdgeInsets.only(
+                                  left: 26,
+                                  top: 4,
+                                ),
                                 child: Text(
                                   'Handling Fee: ₱${state.handling.deliveryFee.toStringAsFixed(2)}',
                                   style: const TextStyle(

@@ -37,7 +37,9 @@ class SupabasePOSService implements POSService {
     try {
       final response = await _supabase
           .from('services')
-          .select('id, service_type, name, description, base_duration_minutes, rate_per_kg, is_active')
+          .select(
+            'id, service_type, name, description, base_duration_minutes, rate_per_kg, is_active',
+          )
           .eq('is_active', true)
           .order('service_type');
 
@@ -58,7 +60,9 @@ class SupabasePOSService implements POSService {
       final response = await _supabase
           .from('customers')
           .select()
-          .or('first_name.ilike.%$query%,last_name.ilike.%$query%,phone_number.eq.$query');
+          .or(
+            'first_name.ilike.%$query%,last_name.ilike.%$query%,phone_number.eq.$query',
+          );
 
       final customers = (response as List)
           .map((customer) => Customer.fromJson(customer))
@@ -77,7 +81,7 @@ class SupabasePOSService implements POSService {
     try {
       // Get API base URL from environment
       String? apiBaseUrl = dotenv.env['API_BASE_URL'];
-      
+
       // Validate API URL is configured
       if (apiBaseUrl == null || apiBaseUrl.isEmpty) {
         debugPrint('❌ API_BASE_URL not configured in .env file');
@@ -85,7 +89,7 @@ class SupabasePOSService implements POSService {
           'API configuration error: API_BASE_URL is not set in .env file.\n\n'
           'Please add to your .env file:\n'
           'API_BASE_URL=http://localhost:3000\n'
-          '(or your actual web app URL)'
+          '(or your actual web app URL)',
         );
       }
 
@@ -94,19 +98,22 @@ class SupabasePOSService implements POSService {
       debugPrint('API URL: $apiUrl');
       debugPrint('Order Data: ${orderData.toString()}');
 
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken ?? ''}',
-        },
-        body: jsonEncode(orderData),
-      ).timeout(
-        const Duration(seconds: 30),
-        onTimeout: () {
-          throw Exception('Request timeout - API took too long to respond');
-        },
-      );
+      final response = await http
+          .post(
+            Uri.parse(apiUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization':
+                  'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken ?? ''}',
+            },
+            body: jsonEncode(orderData),
+          )
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw Exception('Request timeout - API took too long to respond');
+            },
+          );
 
       debugPrint('API Response Status: ${response.statusCode}');
       debugPrint('API Response Body: ${response.body}');
@@ -128,7 +135,9 @@ class SupabasePOSService implements POSService {
         final error = jsonDecode(response.body);
         throw Exception('Server Error: ${error['error'] ?? response.body}');
       } else {
-        throw Exception('Failed to save order (${response.statusCode}): ${response.body}');
+        throw Exception(
+          'Failed to save order (${response.statusCode}): ${response.body}',
+        );
       }
     } on SocketException catch (e) {
       debugPrint('❌ Network Error: $e');

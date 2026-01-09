@@ -45,10 +45,7 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
     return Consumer<BookingStateNotifier>(
       builder: (context, state, _) {
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Order Booking'),
-            elevation: 2,
-          ),
+          appBar: AppBar(title: const Text('Order Booking'), elevation: 2),
           body: Column(
             children: [
               // Tab/Step indicator
@@ -80,14 +77,26 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
                         'Baskets',
                         BookingPane.basket,
                         state.baskets.isNotEmpty &&
-                            state.baskets.any((b) => b.washCount > 0 || b.dryCount > 0 || b.iron || b.fold),
+                            state.baskets.any(
+                              (b) =>
+                                  b.washCount > 0 ||
+                                  b.dryCount > 0 ||
+                                  b.iron ||
+                                  b.fold,
+                            ),
                       ),
                       _buildStepButton(
                         context,
                         'Receipt',
                         BookingPane.receipt,
                         state.baskets.isNotEmpty &&
-                            state.baskets.any((b) => b.washCount > 0 || b.dryCount > 0 || b.iron || b.fold),
+                            state.baskets.any(
+                              (b) =>
+                                  b.washCount > 0 ||
+                                  b.dryCount > 0 ||
+                                  b.iron ||
+                                  b.fold,
+                            ),
                       ),
                     ],
                   ),
@@ -126,7 +135,8 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
         return Padding(
           padding: const EdgeInsets.only(right: 4),
           child: ElevatedButton(
-            onPressed: () => context.read<BookingStateNotifier>().setActivePane(pane),
+            onPressed: () =>
+                context.read<BookingStateNotifier>().setActivePane(pane),
             style: ElevatedButton.styleFrom(
               backgroundColor: isActive ? Colors.blue : Colors.grey[300],
             ),

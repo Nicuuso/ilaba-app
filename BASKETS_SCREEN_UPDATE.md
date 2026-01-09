@@ -1,6 +1,7 @@
 # Baskets Screen Update - Implementation Summary
 
 ## Overview
+
 The baskets screen has been completely redesigned using a tile-based interface inspired by the web POS, adapted for mobile with a 2-column grid layout. Services are now fetched from the Supabase database.
 
 ## What Changed
@@ -8,6 +9,7 @@ The baskets screen has been completely redesigned using a tile-based interface i
 ### 1. **Screen Design (booking_baskets_screen.dart)**
 
 #### Layout Improvements:
+
 - **Tab Navigation**: Horizontal scrollable basket tabs with delete button overlay
 - **Empty State**: Icon and message when no baskets exist
 - **Grid-Based Services**: 2-column grid for service tiles (Wash, Dry, Spin, Iron, Fold)
@@ -16,6 +18,7 @@ The baskets screen has been completely redesigned using a tile-based interface i
 - **Visual Feedback**: Color-coded tiles with disabled state
 
 #### Mobile Optimizations:
+
 - Responsive 2x3 grid for 6 service tiles
 - Compact basket tabs with delete button positioning
 - Scrollable layout with summary always visible
@@ -23,6 +26,7 @@ The baskets screen has been completely redesigned using a tile-based interface i
 - Clear visual hierarchy with sections
 
 #### Key Features:
+
 ```
 [Basket Tabs] [Add Basket]
 
@@ -31,7 +35,7 @@ Weight Input
 Service Tiles Grid:
   [Wash]  [Dry]
   [Spin]  [Iron]
-  [Fold]  
+  [Fold]
 
 Premium Services Info (conditional)
 
@@ -42,9 +46,10 @@ Estimated Duration Box
 Basket Summary
 ```
 
-### 2. **Service Tile Component (_ServiceTile Widget)**
+### 2. **Service Tile Component (\_ServiceTile Widget)**
 
 Custom widget that displays:
+
 - Service title
 - Count indicator
 - Premium badge (for Wash/Dry)
@@ -53,6 +58,7 @@ Custom widget that displays:
 - Disabled state (grayed out when weight = 0)
 
 **Service Types Supported:**
+
 - **Wash**: Countable, with Premium option
 - **Dry**: Countable, with Premium option
 - **Spin**: Countable, no premium
@@ -62,6 +68,7 @@ Custom widget that displays:
 ### 3. **Database Integration**
 
 #### Services Table Structure:
+
 ```sql
 CREATE TABLE services (
   id UUID PRIMARY KEY,
@@ -75,6 +82,7 @@ CREATE TABLE services (
 ```
 
 #### Basket Services Table:
+
 ```sql
 CREATE TABLE basket_services (
   id UUID PRIMARY KEY,
@@ -89,6 +97,7 @@ CREATE TABLE basket_services (
 ### 4. **Database Fetching (pos_service_impl.dart)**
 
 The `getServices()` method fetches services from Supabase:
+
 ```dart
 Future<List<LaundryService>> getServices() async {
   final response = await _supabase
@@ -96,7 +105,7 @@ Future<List<LaundryService>> getServices() async {
       .select('id, service_type, name, base_duration_minutes, rate_per_kg, is_active')
       .eq('is_active', true)
       .order('service_type');
-  
+
   return (response as List)
       .map((service) => LaundryService.fromJson(service))
       .toList();
@@ -106,6 +115,7 @@ Future<List<LaundryService>> getServices() async {
 ### 5. **State Management Integration**
 
 Services are loaded in `BookingStateNotifier` via `loadServices()`:
+
 - Fetches from database automatically
 - Updates available services list
 - Used for duration calculations
@@ -114,6 +124,7 @@ Services are loaded in `BookingStateNotifier` via `loadServices()`:
 ### 6. **Visual Design Elements**
 
 #### Color Coding:
+
 - **Wash**: Blue
 - **Dry**: Orange
 - **Spin**: Cyan
@@ -121,6 +132,7 @@ Services are loaded in `BookingStateNotifier` via `loadServices()`:
 - **Fold**: Teal
 
 #### State Indicators:
+
 - **Selected**: Bold border, light background color
 - **Disabled**: Grayed out (when weight = 0)
 - **Premium**: Purple background/text
@@ -136,22 +148,26 @@ Services are loaded in `BookingStateNotifier` via `loadServices()`:
 ## Functional Features
 
 ### Weight Dependency
+
 - All services (except notes) are disabled if basket weight = 0
 - Visual feedback with gray overlay
 - Clear UX to prevent configuration without weight
 
 ### Premium Services
+
 - Only Wash and Dry support premium
 - Premium toggle at bottom of tile
 - Visual indicator (purple when selected)
 - Affects pricing in receipt calculation
 
 ### Toggle vs Count Services
+
 - **Wash, Dry, Spin**: Count-based (0, 1, 2, 3...)
 - **Iron, Fold**: Toggle-only (0 or 1)
 - Visual difference: Icon display (✓ for toggles, number for count)
 
 ### Summary Display
+
 - Weight
 - Service breakdown (only non-zero services)
 - Premium indicators
@@ -160,6 +176,7 @@ Services are loaded in `BookingStateNotifier` via `loadServices()`:
 ## Database Mapping
 
 Services from database are mapped as:
+
 - `id` → `id`
 - `service_type` → `serviceType` (matches tile title lookup)
 - `name` → `name`
@@ -170,6 +187,7 @@ Services from database are mapped as:
 ## Ready for Backend
 
 Implementation is complete. You need to:
+
 1. ✅ Create `services` table in Supabase
 2. ✅ Add service records (wash, dry, spin, iron, fold)
 3. ✅ Create `basket_services` junction table
@@ -191,6 +209,7 @@ INSERT INTO services (service_type, name, base_duration_minutes, rate_per_kg, is
 ## Architecture Notes
 
 The design follows web POS patterns:
+
 - Tile-based interface for quick interaction
 - Color-coded services for visual distinction
 - Context-aware controls (disabled when invalid)
@@ -198,6 +217,7 @@ The design follows web POS patterns:
 - Real-time duration estimation
 
 Mobile adaptations:
+
 - 2-column grid instead of 4-column
 - Vertical tab scroll instead of horizontal
 - Compact spacing for small screens

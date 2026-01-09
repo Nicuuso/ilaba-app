@@ -328,8 +328,10 @@ class BookingStateNotifier extends ChangeNotifier {
       );
     }).toList();
 
-    final productSubtotal =
-        productLines.fold(0.0, (sum, line) => sum + line.lineTotal);
+    final productSubtotal = productLines.fold(
+      0.0,
+      (sum, line) => sum + line.lineTotal,
+    );
 
     // Basket lines
     final basketLines = baskets.map((b) {
@@ -351,12 +353,14 @@ class BookingStateNotifier extends ChangeNotifier {
           : 0.0;
 
       final ironService = getServiceByType('iron', false);
-      final ironPrice =
-          b.iron && ironService != null ? ironService.ratePerKg * weight : 0.0;
+      final ironPrice = b.iron && ironService != null
+          ? ironService.ratePerKg * weight
+          : 0.0;
 
       final foldService = getServiceByType('fold', false);
-      final foldPrice =
-          b.fold && foldService != null ? foldService.ratePerKg * weight : 0.0;
+      final foldPrice = b.fold && foldService != null
+          ? foldService.ratePerKg * weight
+          : 0.0;
 
       final subtotal = washPrice + dryPrice + spinPrice + ironPrice + foldPrice;
 
@@ -371,18 +375,17 @@ class BookingStateNotifier extends ChangeNotifier {
           'iron': ironPrice,
           'fold': foldPrice,
         },
-        premiumFlags: {
-          'wash': b.washPremium,
-          'dry': b.dryPremium,
-        },
+        premiumFlags: {'wash': b.washPremium, 'dry': b.dryPremium},
         notes: b.notes,
         total: subtotal,
         estimatedDurationMinutes: calculateBasketDuration(b),
       );
     }).toList();
 
-    final basketSubtotal =
-        basketLines.fold(0.0, (sum, line) => sum + line.total);
+    final basketSubtotal = basketLines.fold(
+      0.0,
+      (sum, line) => sum + line.total,
+    );
 
     // Handling fee
     final handlingFee = handling.deliver ? handling.deliveryFee : 0.0;
@@ -390,8 +393,7 @@ class BookingStateNotifier extends ChangeNotifier {
     final subtotalBeforeTax = productSubtotal + basketSubtotal + handlingFee;
 
     // VAT calculation
-    final vatIncluded =
-        subtotalBeforeTax * (TAX_RATE / (1 + TAX_RATE));
+    final vatIncluded = subtotalBeforeTax * (TAX_RATE / (1 + TAX_RATE));
 
     return ComputedReceipt(
       productLines: productLines,
@@ -455,7 +457,10 @@ class BookingStateNotifier extends ChangeNotifier {
 
                 if (!isActive) return null;
 
-                final service = getServiceByType(type, premiumMap[type] ?? false);
+                final service = getServiceByType(
+                  type,
+                  premiumMap[type] ?? false,
+                );
                 if (service == null) return null;
 
                 final subtotal = (service.ratePerKg * b.weightKg * count);
@@ -474,7 +479,10 @@ class BookingStateNotifier extends ChangeNotifier {
             'weight': b.weightKg,
             'notes': b.notes.isNotEmpty ? b.notes : null,
             'subtotal': receipt.basketLines
-                .firstWhere((bl) => bl.id == b.id, orElse: () => throw Exception('Basket not found'))
+                .firstWhere(
+                  (bl) => bl.id == b.id,
+                  orElse: () => throw Exception('Basket not found'),
+                )
                 .total,
             'services': basketServices,
           };
@@ -493,10 +501,18 @@ class BookingStateNotifier extends ChangeNotifier {
             'amount': receipt.total,
             'method': payment.method,
             'reference': payment.referenceNumber,
-          }
+          },
         ],
-        'pickupAddress': handling.pickup ? handling.pickupAddress.isNotEmpty ? handling.pickupAddress : null : null,
-        'deliveryAddress': handling.deliver ? handling.deliveryAddress.isNotEmpty ? handling.deliveryAddress : null : null,
+        'pickupAddress': handling.pickup
+            ? handling.pickupAddress.isNotEmpty
+                  ? handling.pickupAddress
+                  : null
+            : null,
+        'deliveryAddress': handling.deliver
+            ? handling.deliveryAddress.isNotEmpty
+                  ? handling.deliveryAddress
+                  : null
+            : null,
         'shippingFee': handling.deliver ? handling.deliveryFee : 0,
       };
 
