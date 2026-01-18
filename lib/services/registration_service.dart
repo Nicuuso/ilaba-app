@@ -40,22 +40,23 @@ class RegistrationServiceImpl implements RegistrationService {
         'phone_number': phoneNumber,
         'birthdate': birthdate,
         'gender': gender,
-        if (middleName != null && middleName.isNotEmpty) 'middle_name': middleName,
+        if (middleName != null && middleName.isNotEmpty)
+          'middle_name': middleName,
         if (address != null && address.isNotEmpty) 'address': address,
       };
 
       debugPrint('📤 Payload: ${jsonEncode(payload)}');
 
-      final response = await http.post(
-        Uri.parse('$baseUrl$endpoint'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(payload),
-      ).timeout(
-        const Duration(seconds: 30),
-        onTimeout: () => throw Exception('Registration request timed out'),
-      );
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl$endpoint'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(payload),
+          )
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () => throw Exception('Registration request timed out'),
+          );
 
       debugPrint('📥 Response status: ${response.statusCode}');
       debugPrint('📥 Response body: ${response.body}');
@@ -73,7 +74,9 @@ class RegistrationServiceImpl implements RegistrationService {
         }
       } else {
         final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
-        final errorMsg = errorBody['error'] ?? 'Registration failed with status ${response.statusCode}';
+        final errorMsg =
+            errorBody['error'] ??
+            'Registration failed with status ${response.statusCode}';
         debugPrint('❌ HTTP error: $errorMsg');
         throw Exception(errorMsg);
       }

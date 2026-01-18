@@ -77,7 +77,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
 
     if (!_agreedToTerms) {
-      _showErrorSnackbar('Please accept the Terms of Service and Privacy Policy');
+      _showErrorSnackbar(
+        'Please accept the Terms of Service and Privacy Policy',
+      );
       return;
     }
 
@@ -86,8 +88,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
     });
 
     try {
-      debugPrint('📝 Attempting registration for: ${_emailController.text.trim()}');
-      
+      debugPrint(
+        '📝 Attempting registration for: ${_emailController.text.trim()}',
+      );
+
       await _registrationService.registerCustomer(
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
@@ -339,7 +343,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 () => Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const TermsOfServiceScreen(),
+                                    builder: (context) =>
+                                        const TermsOfServiceScreen(),
                                   ),
                                 ),
                               ),
@@ -355,7 +360,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 () => Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const PrivacyPolicyScreen(),
+                                    builder: (context) =>
+                                        const PrivacyPolicyScreen(),
                                   ),
                                 ),
                               ),

@@ -4,10 +4,7 @@ import 'package:ilaba/screens/login_screen.dart';
 class RegistrationConfirmationScreen extends StatelessWidget {
   final String email;
 
-  const RegistrationConfirmationScreen({
-    super.key,
-    required this.email,
-  });
+  const RegistrationConfirmationScreen({super.key, required this.email});
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +142,9 @@ class RegistrationConfirmationScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const LoginScreen(),
+                    ),
                     (route) => false,
                   );
                 },
@@ -194,9 +193,9 @@ class RegistrationConfirmationScreen extends StatelessWidget {
             padding: const EdgeInsets.only(top: 6.0),
             child: Text(
               text,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
             ),
           ),
         ),
