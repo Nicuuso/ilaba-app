@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:provider/provider.dart';
-import 'package:ilaba/providers/auth_provider.dart';
+import 'package:flutter/gestures.dart';
+import 'package:ilaba/services/registration_service.dart';
+import 'package:ilaba/screens/registration_confirmation_screen.dart';
+import 'package:ilaba/screens/terms_of_service_screen.dart';
+import 'package:ilaba/screens/privacy_policy_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -17,13 +20,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
   late TextEditingController _phoneNumberController;
   late TextEditingController _emailController;
   late TextEditingController _addressController;
-  late TextEditingController _passwordController;
-  late TextEditingController _confirmPasswordController;
 
   DateTime? _selectedBirthdate;
   String? _selectedGender;
-  bool _passwordVisible = false;
-  bool _confirmPasswordVisible = false;
+  bool _isLoading = false;
+  bool _agreedToTerms = false;
+
+  final RegistrationService _registrationService = RegistrationServiceImpl();
 
   @override
   void initState() {
@@ -34,8 +37,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _phoneNumberController = TextEditingController();
     _emailController = TextEditingController();
     _addressController = TextEditingController();
-    _passwordController = TextEditingController();
-    _confirmPasswordController = TextEditingController();
   }
 
   @override
@@ -46,8 +47,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _phoneNumberController.dispose();
     _emailController.dispose();
     _addressController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -72,49 +71,60 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _phoneNumberController.text.isEmpty ||
         _emailController.text.isEmpty ||
         _selectedBirthdate == null ||
-        _selectedGender == null ||
-        _passwordController.text.isEmpty ||
-        _confirmPasswordController.text.isEmpty) {
+        _selectedGender == null) {
       _showErrorSnackbar('Please fill in all required fields');
       return;
     }
 
-    if (_passwordController.text != _confirmPasswordController.text) {
-      _showErrorSnackbar('Passwords do not match');
+    if (!_agreedToTerms) {
+      _showErrorSnackbar('Please accept the Terms of Service and Privacy Policy');
       return;
     }
 
-    if (_passwordController.text.length < 6) {
-      _showErrorSnackbar('Password must be at least 6 characters');
-      return;
-    }
+    setState(() {
+      _isLoading = true;
+    });
 
-    debugPrint('📝 Attempting signup for: ${_emailController.text.trim()}');
-    final authProvider = context.read<AuthProvider>();
-    final success = await authProvider.signup(
-      firstName: _firstNameController.text.trim(),
-      lastName: _lastNameController.text.trim(),
-      middleName: _middleNameController.text.trim().isEmpty
-          ? null
-          : _middleNameController.text.trim(),
-      email: _emailController.text.trim(),
-      phoneNumber: _phoneNumberController.text.trim(),
-      birthdate: _selectedBirthdate!,
-      gender: _selectedGender!,
-      address: _addressController.text.trim().isEmpty
-          ? null
-          : _addressController.text.trim(),
-      password: _passwordController.text,
-    );
+    try {
+      debugPrint('📝 Attempting registration for: ${_emailController.text.trim()}');
+      
+      await _registrationService.registerCustomer(
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        middleName: _middleNameController.text.trim().isEmpty
+            ? null
+            : _middleNameController.text.trim(),
+        email: _emailController.text.trim(),
+        phoneNumber: _phoneNumberController.text.trim(),
+        birthdate: _selectedBirthdate!.toIso8601String().split('T')[0],
+        gender: _selectedGender!,
+        address: _addressController.text.trim().isEmpty
+            ? null
+            : _addressController.text.trim(),
+      );
 
-    if (success && mounted) {
-      debugPrint('✅ Signup successful');
-      Navigator.of(context).pushReplacementNamed('/home');
-    } else if (mounted) {
-      final errorMsg =
-          authProvider.errorMessage ?? 'Signup failed. Please try again.';
-      debugPrint('❌ Signup failed: $errorMsg');
-      _showErrorSnackbar(errorMsg);
+      if (mounted) {
+        debugPrint('✅ Registration successful');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => RegistrationConfirmationScreen(
+              email: _emailController.text.trim(),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        final errorMsg = e.toString().replaceAll('Exception: ', '');
+        debugPrint('❌ Registration failed: $errorMsg');
+        _showErrorSnackbar(errorMsg);
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -128,6 +138,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
         margin: const EdgeInsets.all(16),
       ),
     );
+  }
+
+  TapGestureRecognizer _buildTapGestureRecognizer(VoidCallback onTap) {
+    return TapGestureRecognizer()..onTap = onTap;
   }
 
   @override
@@ -293,84 +307,82 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 maxLines: 2,
                 keyboardType: TextInputType.streetAddress,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
-              // Password
-              TextField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Password *',
-                  prefixIcon: const Icon(Icons.lock_outlined),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _passwordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
+              // Terms and Privacy Policy Checkbox
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Checkbox(
+                    value: _agreedToTerms,
+                    onChanged: (bool? value) {
                       setState(() {
-                        _passwordVisible = !_passwordVisible;
+                        _agreedToTerms = value ?? false;
                       });
                     },
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                obscureText: !_passwordVisible,
-              ),
-              const SizedBox(height: 16),
-
-              // Confirm Password
-              TextField(
-                controller: _confirmPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'Confirm Password *',
-                  prefixIcon: const Icon(Icons.lock_outlined),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _confirmPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: RichText(
+                        text: TextSpan(
+                          style: Theme.of(context).textTheme.bodySmall,
+                          children: [
+                            const TextSpan(text: 'I agree to the '),
+                            TextSpan(
+                              text: 'Terms of Service',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: _buildTapGestureRecognizer(
+                                () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const TermsOfServiceScreen(),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const TextSpan(text: ' and '),
+                            TextSpan(
+                              text: 'Privacy Policy',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: _buildTapGestureRecognizer(
+                                () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const PrivacyPolicyScreen(),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const TextSpan(text: ' *'),
+                          ],
+                        ),
+                      ),
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _confirmPasswordVisible = !_confirmPasswordVisible;
-                      });
-                    },
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                obscureText: !_confirmPasswordVisible,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Must be at least 6 characters',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
+                ],
               ),
               const SizedBox(height: 24),
 
               // Sign Up Button
-              Consumer<AuthProvider>(
-                builder: (context, authProvider, _) {
-                  return ElevatedButton(
-                    onPressed: authProvider.isLoading ? null : _handleSignup,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: authProvider.isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Sign Up'),
-                  );
-                },
+              ElevatedButton(
+                onPressed: _isLoading ? null : _handleSignup,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Sign Up'),
               ),
               const SizedBox(height: 16),
 

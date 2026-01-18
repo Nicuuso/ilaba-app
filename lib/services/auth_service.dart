@@ -129,6 +129,7 @@ class AuthServiceImpl implements AuthService {
         emailAddress: email,
         phoneNumber: phoneNumber,
         address: address,
+        loyaltyPoints: 0, // Initialize new customers with 0 loyalty points
         createdAt: DateTime.now(),
       );
 

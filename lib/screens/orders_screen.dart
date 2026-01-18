@@ -940,8 +940,10 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
     final breakdownBaskets = (breakdown['baskets'] as List?) ?? [];
     final breakdownFees = (breakdown['fees'] as List?) ?? [];
     final breakdownDiscounts = (breakdown['discounts'] as List?) ?? [];
-    final breakdownSummary = (breakdown['summary'] as Map<String, dynamic>?) ?? {};
-    final breakdownPayment = (breakdown['payment'] as Map<String, dynamic>?) ?? {};
+    final breakdownSummary =
+        (breakdown['summary'] as Map<String, dynamic>?) ?? {};
+    final breakdownPayment =
+        (breakdown['payment'] as Map<String, dynamic>?) ?? {};
     final breakdownAuditLog = (breakdown['audit_log'] as List?) ?? [];
 
     // Parse handling
@@ -1073,7 +1075,12 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
 
             // 🛍️ Product Items Section
             if (breakdownItems.isNotEmpty) ...[
-              _buildSectionHeader(context, Icons.shopping_bag_outlined, 'Products', breakdownItems.length.toString()),
+              _buildSectionHeader(
+                context,
+                Icons.shopping_bag_outlined,
+                'Products',
+                breakdownItems.length.toString(),
+              ),
               const SizedBox(height: 12),
               ...breakdownItems.asMap().entries.map((entry) {
                 final item = entry.value as Map<String, dynamic>;
@@ -1091,28 +1098,46 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
                       children: [
                         Text(
                           item['product_name'] ?? 'Unknown Product',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 10),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Qty: ${item['quantity'] ?? 0}', style: Theme.of(context).textTheme.bodySmall),
-                            Text('₱${item['unit_price'] ?? 0} each', style: Theme.of(context).textTheme.bodySmall),
-                            Text('Subtotal: ₱${item['subtotal'] ?? 0}', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
+                            Text(
+                              'Qty: ${item['quantity'] ?? 0}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            Text(
+                              '₱${item['unit_price'] ?? 0} each',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            Text(
+                              'Subtotal: ₱${item['subtotal'] ?? 0}',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
                           ],
                         ),
                         if (item['discount'] != null) ...[
                           const SizedBox(height: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.red[50],
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               'Discount: -₱${item['discount']['amount']}',
-                              style: TextStyle(fontSize: 12, color: Colors.red[700], fontWeight: FontWeight.w600),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.red[700],
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -1126,18 +1151,26 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
 
             // 🧺 Laundry Baskets Section
             if (breakdownBaskets.isNotEmpty) ...[
-              _buildSectionHeader(context, Icons.local_laundry_service_outlined, 'Laundry Baskets', breakdownBaskets.length.toString()),
+              _buildSectionHeader(
+                context,
+                Icons.local_laundry_service_outlined,
+                'Laundry Baskets',
+                breakdownBaskets.length.toString(),
+              ),
               const SizedBox(height: 12),
               ...breakdownBaskets.asMap().entries.map((entry) {
                 final basket = entry.value as Map<String, dynamic>;
                 final services = (basket['services'] as List?) ?? [];
-                
+
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
-                    side: BorderSide(color: Colors.blue.withOpacity(0.2), width: 1),
+                    side: BorderSide(
+                      color: Colors.blue.withOpacity(0.2),
+                      width: 1,
+                    ),
                   ),
                   color: Colors.blue.withOpacity(0.06),
                   child: Padding(
@@ -1153,19 +1186,31 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
                               children: [
                                 Text(
                                   'Basket #${basket['basket_number'] ?? 'N/A'}',
-                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                                  style: Theme.of(context).textTheme.titleSmall
+                                      ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
                               decoration: BoxDecoration(
-                                color: _getStatusColor(basket['status']).withOpacity(0.15),
+                                color: _getStatusColor(
+                                  basket['status'],
+                                ).withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                (basket['status'] ?? 'N/A').toString().toUpperCase(),
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: _getStatusColor(basket['status'])),
+                                (basket['status'] ?? 'N/A')
+                                    .toString()
+                                    .toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: _getStatusColor(basket['status']),
+                                ),
                               ),
                             ),
                           ],
@@ -1176,12 +1221,21 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
                           runSpacing: 8,
                           children: [
                             if (basket['weight'] != null)
-                              _buildMetricChip(Icons.scale, '${basket['weight']} kg', Colors.orange),
+                              _buildMetricChip(
+                                Icons.scale,
+                                '${basket['weight']} kg',
+                                Colors.orange,
+                              ),
                             if (basket['total'] != null)
-                              _buildMetricChip(Icons.attach_money, '₱${basket['total']}', Colors.green),
+                              _buildMetricChip(
+                                Icons.attach_money,
+                                '₱${basket['total']}',
+                                Colors.green,
+                              ),
                           ],
                         ),
-                        if (basket['basket_notes'] != null && (basket['basket_notes'] as String).isNotEmpty) ...[
+                        if (basket['basket_notes'] != null &&
+                            (basket['basket_notes'] as String).isNotEmpty) ...[
                           const SizedBox(height: 12),
                           Container(
                             padding: const EdgeInsets.all(10),
@@ -1191,16 +1245,31 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.note_outlined, size: 16, color: Colors.orange[700]),
+                                Icon(
+                                  Icons.note_outlined,
+                                  size: 16,
+                                  color: Colors.orange[700],
+                                ),
                                 const SizedBox(width: 8),
-                                Expanded(child: Text(basket['basket_notes'] ?? '', style: Theme.of(context).textTheme.labelSmall)),
+                                Expanded(
+                                  child: Text(
+                                    basket['basket_notes'] ?? '',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelSmall,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                         ],
                         if (services.isNotEmpty) ...[
                           const SizedBox(height: 14),
-                          Text('Services', style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold)),
+                          Text(
+                            'Services',
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
                           const SizedBox(height: 10),
                           ...services.map((service) {
                             final svc = service as Map<String, dynamic>;
@@ -1211,42 +1280,80 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.5),
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: Colors.blue.withOpacity(0.1)),
+                                  border: Border.all(
+                                    color: Colors.blue.withOpacity(0.1),
+                                  ),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Expanded(
                                           child: Text(
                                             svc['service_name'] ?? 'Unknown',
-                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.w600,
+                                                ),
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
                                         const SizedBox(width: 8),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
                                           decoration: BoxDecoration(
-                                            color: _getStatusColor(svc['status']).withOpacity(0.15),
-                                            borderRadius: BorderRadius.circular(4),
+                                            color: _getStatusColor(
+                                              svc['status'],
+                                            ).withOpacity(0.15),
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
                                           ),
                                           child: Text(
-                                            (svc['status'] ?? 'pending').toString().toUpperCase(),
-                                            style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: _getStatusColor(svc['status'])),
+                                            (svc['status'] ?? 'pending')
+                                                .toString()
+                                                .toUpperCase(),
+                                            style: TextStyle(
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w700,
+                                              color: _getStatusColor(
+                                                svc['status'],
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ],
                                     ),
                                     const SizedBox(height: 8),
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text('Qty: ${svc['multiplier'] ?? 1}x @ ₱${svc['rate_per_kg'] ?? 0}/kg', style: Theme.of(context).textTheme.labelSmall),
-                                        Text('₱${svc['subtotal'] ?? 0}', style: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.green)),
+                                        Text(
+                                          'Qty: ${svc['multiplier'] ?? 1}x @ ₱${svc['rate_per_kg'] ?? 0}/kg',
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.labelSmall,
+                                        ),
+                                        Text(
+                                          '₱${svc['subtotal'] ?? 0}',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelSmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.green,
+                                              ),
+                                        ),
                                       ],
                                     ),
                                   ],
@@ -1265,13 +1372,21 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
 
             // 📋 Fees Section
             if (breakdownFees.isNotEmpty) ...[
-              _buildSectionHeader(context, Icons.receipt_long_outlined, 'Fees', ''),
+              _buildSectionHeader(
+                context,
+                Icons.receipt_long_outlined,
+                'Fees',
+                '',
+              ),
               const SizedBox(height: 12),
               ...breakdownFees.map((fee) {
                 final f = fee as Map<String, dynamic>;
                 return Container(
                   margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.amber[50],
                     borderRadius: BorderRadius.circular(10),
@@ -1283,12 +1398,25 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(f['description'] ?? 'Fee', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
-                            Text('Type: ${f['type'] ?? 'Unknown'}', style: Theme.of(context).textTheme.labelSmall),
+                            Text(
+                              f['description'] ?? 'Fee',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            Text(
+                              'Type: ${f['type'] ?? 'Unknown'}',
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
                           ],
                         ),
                       ),
-                      Text('₱${f['amount']}', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.amber[900])),
+                      Text(
+                        '₱${f['amount']}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amber[900],
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -1298,13 +1426,21 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
 
             // 🎁 Discounts Section
             if (breakdownDiscounts.isNotEmpty) ...[
-              _buildSectionHeader(context, Icons.local_offer_outlined, 'Discounts Applied', ''),
+              _buildSectionHeader(
+                context,
+                Icons.local_offer_outlined,
+                'Discounts Applied',
+                '',
+              ),
               const SizedBox(height: 12),
               ...breakdownDiscounts.map((discount) {
                 final d = discount as Map<String, dynamic>;
                 return Container(
                   margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.red[50],
                     borderRadius: BorderRadius.circular(10),
@@ -1316,12 +1452,26 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${d['type']?.toString().toUpperCase() ?? 'Discount'} - ${d['value']}${d['value_type'] == 'percentage' ? '%' : ''}', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
-                            if (d['reason'] != null) Text(d['reason'], style: Theme.of(context).textTheme.labelSmall),
+                            Text(
+                              '${d['type']?.toString().toUpperCase() ?? 'Discount'} - ${d['value']}${d['value_type'] == 'percentage' ? '%' : ''}',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            if (d['reason'] != null)
+                              Text(
+                                d['reason'],
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
                           ],
                         ),
                       ),
-                      Text('-₱${d['applied_amount'] ?? 0}', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.red[700])),
+                      Text(
+                        '-₱${d['applied_amount'] ?? 0}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red[700],
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -1330,27 +1480,65 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
             ],
 
             // 💰 Order Summary Section
-            _buildSectionHeader(context, Icons.receipt_long_outlined, 'Order Summary', ''),
+            _buildSectionHeader(
+              context,
+              Icons.receipt_long_outlined,
+              'Order Summary',
+              '',
+            ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [Colors.grey[50]!, Colors.grey[100]!]),
+                gradient: LinearGradient(
+                  colors: [Colors.grey[50]!, Colors.grey[100]!],
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSummaryRow(context, 'Subtotal (Products)', '₱${breakdownSummary['subtotal_products'] ?? 0}', isHighlight: false),
-                  _buildSummaryRow(context, 'Subtotal (Services)', '₱${breakdownSummary['subtotal_services'] ?? 0}', isHighlight: false),
+                  _buildSummaryRow(
+                    context,
+                    'Subtotal (Products)',
+                    '₱${breakdownSummary['subtotal_products'] ?? 0}',
+                    isHighlight: false,
+                  ),
+                  _buildSummaryRow(
+                    context,
+                    'Subtotal (Services)',
+                    '₱${breakdownSummary['subtotal_services'] ?? 0}',
+                    isHighlight: false,
+                  ),
                   if ((breakdownSummary['handling'] ?? 0) > 0)
-                    _buildSummaryRow(context, 'Handling', '₱${breakdownSummary['handling'] ?? 0}', isHighlight: false),
+                    _buildSummaryRow(
+                      context,
+                      'Handling',
+                      '₱${breakdownSummary['handling'] ?? 0}',
+                      isHighlight: false,
+                    ),
                   if ((breakdownSummary['service_fee'] ?? 0) > 0)
-                    _buildSummaryRow(context, 'Service Fee', '₱${breakdownSummary['service_fee'] ?? 0}', isHighlight: false),
+                    _buildSummaryRow(
+                      context,
+                      'Service Fee',
+                      '₱${breakdownSummary['service_fee'] ?? 0}',
+                      isHighlight: false,
+                    ),
                   const Divider(height: 16),
-                  _buildSummaryRow(context, 'Subtotal', '₱${(breakdownSummary['subtotal_products'] ?? 0) + (breakdownSummary['subtotal_services'] ?? 0)}', isHighlight: true),
+                  _buildSummaryRow(
+                    context,
+                    'Subtotal',
+                    '₱${(breakdownSummary['subtotal_products'] ?? 0) + (breakdownSummary['subtotal_services'] ?? 0)}',
+                    isHighlight: true,
+                  ),
                   if ((breakdownSummary['discounts'] ?? 0) > 0)
-                    _buildSummaryRow(context, 'Discounts', '-₱${breakdownSummary['discounts'] ?? 0}', isHighlight: true, isNegative: true),
+                    _buildSummaryRow(
+                      context,
+                      'Discounts',
+                      '-₱${breakdownSummary['discounts'] ?? 0}',
+                      isHighlight: true,
+                      isNegative: true,
+                    ),
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.all(10),
@@ -1361,14 +1549,31 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('VAT (${(breakdownSummary['vat_rate'] ?? 12).toStringAsFixed(0)}%)', style: Theme.of(context).textTheme.labelSmall),
-                        Text('₱${breakdownSummary['vat_amount'] ?? 0}', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
-                        Text('(Inclusive)', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Colors.grey[600])),
+                        Text(
+                          'VAT (${(breakdownSummary['vat_rate'] ?? 12).toStringAsFixed(0)}%)',
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                        Text(
+                          '₱${breakdownSummary['vat_amount'] ?? 0}',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          '(Inclusive)',
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(color: Colors.grey[600]),
+                        ),
                       ],
                     ),
                   ),
                   const Divider(height: 16),
-                  _buildSummaryRow(context, 'GRAND TOTAL', '₱${breakdownSummary['grand_total'] ?? 0}', isHighlight: true, isTotal: true),
+                  _buildSummaryRow(
+                    context,
+                    'GRAND TOTAL',
+                    '₱${breakdownSummary['grand_total'] ?? 0}',
+                    isHighlight: true,
+                    isTotal: true,
+                  ),
                 ],
               ),
             ),
@@ -1376,7 +1581,12 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
 
             // 💳 Payment Section
             if (breakdownPayment.isNotEmpty) ...[
-              _buildSectionHeader(context, Icons.payment_outlined, 'Payment', ''),
+              _buildSectionHeader(
+                context,
+                Icons.payment_outlined,
+                'Payment',
+                '',
+              ),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(16),
@@ -1391,44 +1601,81 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Method', style: Theme.of(context).textTheme.labelMedium),
+                        Text(
+                          'Method',
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.green[700],
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            (breakdownPayment['method'] ?? 'Unknown').toString().toUpperCase(),
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
+                            (breakdownPayment['method'] ?? 'Unknown')
+                                .toString()
+                                .toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _buildSummaryRow(context, 'Amount Paid', '₱${breakdownPayment['amount_paid'] ?? 0}'),
+                    _buildSummaryRow(
+                      context,
+                      'Amount Paid',
+                      '₱${breakdownPayment['amount_paid'] ?? 0}',
+                    ),
                     if ((breakdownPayment['change'] ?? 0) > 0)
-                      _buildSummaryRow(context, 'Change', '₱${breakdownPayment['change'] ?? 0}', isNegative: true),
+                      _buildSummaryRow(
+                        context,
+                        'Change',
+                        '₱${breakdownPayment['change'] ?? 0}',
+                        isNegative: true,
+                      ),
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: _getStatusColor(breakdownPayment['payment_status']).withOpacity(0.15),
+                        color: _getStatusColor(
+                          breakdownPayment['payment_status'],
+                        ).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Status', style: Theme.of(context).textTheme.labelSmall),
+                          Text(
+                            'Status',
+                            style: Theme.of(context).textTheme.labelSmall,
+                          ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: _getStatusColor(breakdownPayment['payment_status']),
+                              color: _getStatusColor(
+                                breakdownPayment['payment_status'],
+                              ),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              (breakdownPayment['payment_status'] ?? 'N/A').toString().toUpperCase(),
-                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white),
+                              (breakdownPayment['payment_status'] ?? 'N/A')
+                                  .toString()
+                                  .toUpperCase(),
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ],
@@ -1444,14 +1691,28 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.receipt_outlined, size: 16, color: Colors.grey[600]),
+                            Icon(
+                              Icons.receipt_outlined,
+                              size: 16,
+                              color: Colors.grey[600],
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Ref Number', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Colors.grey[600])),
-                                  Text(breakdownPayment['reference_number'] ?? '', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
+                                  Text(
+                                    'Ref Number',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(color: Colors.grey[600]),
+                                  ),
+                                  Text(
+                                    breakdownPayment['reference_number'] ?? '',
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(fontWeight: FontWeight.w600),
+                                  ),
                                 ],
                               ),
                             ),
@@ -1467,14 +1728,24 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
 
             // 📍 Handling Section
             if (pickupData.isNotEmpty || deliveryData.isNotEmpty) ...[
-              _buildSectionHeader(context, Icons.local_shipping_outlined, 'Fulfillment', ''),
+              _buildSectionHeader(
+                context,
+                Icons.local_shipping_outlined,
+                'Fulfillment',
+                '',
+              ),
               const SizedBox(height: 12),
               if (pickupData.isNotEmpty) ...[
                 _buildHandlingCard(context, 'Pickup', pickupData, Colors.blue),
                 const SizedBox(height: 12),
               ],
               if (deliveryData.isNotEmpty) ...[
-                _buildHandlingCard(context, 'Delivery', deliveryData, Colors.purple),
+                _buildHandlingCard(
+                  context,
+                  'Delivery',
+                  deliveryData,
+                  Colors.purple,
+                ),
                 const SizedBox(height: 12),
               ],
               const SizedBox(height: 16),
@@ -1494,27 +1765,51 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.cancel_outlined, color: Colors.red[700], size: 20),
+                        Icon(
+                          Icons.cancel_outlined,
+                          color: Colors.red[700],
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
-                        Text('Order Cancelled', style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.red[700], fontWeight: FontWeight.bold)),
+                        Text(
+                          'Order Cancelled',
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color: Colors.red[700],
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    Text('Reason: ${cancellation['reason'] ?? 'N/A'}', style: Theme.of(context).textTheme.bodySmall),
+                    Text(
+                      'Reason: ${cancellation['reason'] ?? 'N/A'}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                     if (cancellation['notes'] != null) ...[
                       const SizedBox(height: 6),
-                      Text('Notes: ${cancellation['notes']}', style: Theme.of(context).textTheme.labelSmall),
+                      Text(
+                        'Notes: ${cancellation['notes']}',
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
                     ],
                     const SizedBox(height: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.red[700],
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         'Refund: ${cancellation['refund_status']?.toString().toUpperCase() ?? 'N/A'}',
-                        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ],
@@ -1525,7 +1820,12 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
 
             // 📝 Audit Log Timeline
             if (breakdownAuditLog.isNotEmpty) ...[
-              _buildSectionHeader(context, Icons.history_outlined, 'Activity Timeline', ''),
+              _buildSectionHeader(
+                context,
+                Icons.history_outlined,
+                'Activity Timeline',
+                '',
+              ),
               const SizedBox(height: 12),
               _buildAuditLogTimeline(context, breakdownAuditLog),
               const SizedBox(height: 20),
@@ -1713,7 +2013,14 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
     return buffer.toString();
   }
 
-  Widget _buildSummaryRow(BuildContext context, String label, String value, {bool isHighlight = true, bool isNegative = false, bool isTotal = false}) {
+  Widget _buildSummaryRow(
+    BuildContext context,
+    String label,
+    String value, {
+    bool isHighlight = true,
+    bool isNegative = false,
+    bool isTotal = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -1722,7 +2029,9 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: isTotal || isHighlight ? FontWeight.bold : FontWeight.normal,
+              fontWeight: isTotal || isHighlight
+                  ? FontWeight.bold
+                  : FontWeight.normal,
               fontSize: isTotal ? 14 : 12,
             ),
           ),
@@ -1730,7 +2039,9 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
             value,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               fontWeight: isTotal ? FontWeight.bold : FontWeight.w600,
-              color: isNegative ? Colors.red[700] : (isTotal ? Colors.green[700] : null),
+              color: isNegative
+                  ? Colors.red[700]
+                  : (isTotal ? Colors.green[700] : null),
               fontSize: isTotal ? 14 : 12,
             ),
           ),
@@ -1739,7 +2050,12 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHandlingCard(BuildContext context, String title, Map<String, dynamic> data, Color color) {
+  Widget _buildHandlingCard(
+    BuildContext context,
+    String title,
+    Map<String, dynamic> data,
+    Color color,
+  ) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 0,
@@ -1758,18 +2074,27 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 if (data['status'] != null)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: _getStatusColor(data['status']).withOpacity(0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       data['status'].toString().toUpperCase(),
-                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: _getStatusColor(data['status'])),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: _getStatusColor(data['status']),
+                      ),
                     ),
                   ),
               ],
@@ -1791,8 +2116,16 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Address', style: Theme.of(context).textTheme.labelSmall),
-                          Text(data['address'], style: Theme.of(context).textTheme.bodySmall, maxLines: 2, overflow: TextOverflow.ellipsis),
+                          Text(
+                            'Address',
+                            style: Theme.of(context).textTheme.labelSmall,
+                          ),
+                          Text(
+                            data['address'],
+                            style: Theme.of(context).textTheme.bodySmall,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ],
                       ),
                     ),
@@ -1801,7 +2134,8 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
               ),
               const SizedBox(height: 10),
             ],
-            if (data['notes'] != null && (data['notes'] as String).isNotEmpty) ...[
+            if (data['notes'] != null &&
+                (data['notes'] as String).isNotEmpty) ...[
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
@@ -1810,10 +2144,19 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.note_outlined, size: 16, color: Colors.orange[700]),
+                    Icon(
+                      Icons.note_outlined,
+                      size: 16,
+                      color: Colors.orange[700],
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(data['notes'], style: Theme.of(context).textTheme.labelSmall, maxLines: 2, overflow: TextOverflow.ellipsis),
+                      child: Text(
+                        data['notes'],
+                        style: Theme.of(context).textTheme.labelSmall,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
@@ -1833,10 +2176,16 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
                     if (data['started_at'] != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 6),
-                        child: Text('Started: ${data['started_at']}', style: Theme.of(context).textTheme.labelSmall),
+                        child: Text(
+                          'Started: ${data['started_at']}',
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
                       ),
                     if (data['completed_at'] != null)
-                      Text('Completed: ${data['completed_at']}', style: Theme.of(context).textTheme.labelSmall),
+                      Text(
+                        'Completed: ${data['completed_at']}',
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
                   ],
                 ),
               ),
@@ -1852,7 +2201,7 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
       children: auditLog.asMap().entries.map((entry) {
         final log = entry.value as Map<String, dynamic>;
         final action = log['action'] ?? 'Unknown';
-        
+
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(14),
@@ -1880,12 +2229,16 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
                   children: [
                     Text(
                       action.replaceAll('_', ' ').toUpperCase(),
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Time: ${log['timestamp'] ?? 'N/A'}',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Colors.grey[600]),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.labelSmall?.copyWith(color: Colors.grey[600]),
                     ),
                     if (log['changed_by'] != null)
                       Padding(
@@ -1895,7 +2248,8 @@ class _OrderHistoryDetailsPage extends StatelessWidget {
                           style: Theme.of(context).textTheme.labelSmall,
                         ),
                       ),
-                    if (log['details'] != null && (log['details'] as Map).isNotEmpty)
+                    if (log['details'] != null &&
+                        (log['details'] as Map).isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
                         child: Text(
