@@ -8,7 +8,7 @@ import 'package:ilaba/screens/booking_products_screen.dart';
 import 'package:ilaba/screens/booking_baskets_screen.dart';
 import 'package:ilaba/screens/booking_receipt_payment_screen.dart';
 
-/// Main booking flow screen
+/// Main booking flow screen with sequential navigation
 class BookingFlowScreen extends StatefulWidget {
   const BookingFlowScreen({Key? key}) : super(key: key);
 
@@ -17,9 +17,28 @@ class BookingFlowScreen extends StatefulWidget {
 }
 
 class _BookingFlowScreenState extends State<BookingFlowScreen> {
+  late PageController _pageController;
+  int _currentPage = 0;
+
+  final List<BookingPane> _pages = [
+    BookingPane.handling,
+    BookingPane.basket,
+    BookingPane.products,
+    BookingPane.receipt,
+  ];
+
+  final List<String> _pageLabels = [
+    'Handling',
+    'Baskets',
+    'Products',
+    'Receipt',
+  ];
+
   @override
   void initState() {
     super.initState();
+    _pageController = PageController();
+
     // Initialize with current user's information
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = context.read<AuthProvider>();
@@ -41,77 +60,153 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
   }
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _goToNextPage() {
+    if (_currentPage < _pages.length - 1) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _goToPreviousPage() {
+    if (_currentPage > 0) {
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  bool _canGoNext() {
+    final state = context.read<BookingStateNotifier>();
+    switch (_pages[_currentPage]) {
+      case BookingPane.handling:
+        return state.handling.pickup || state.handling.deliver;
+      case BookingPane.basket:
+        return state.baskets.isNotEmpty &&
+            state.baskets.any(
+              (b) =>
+                  b.washCount > 0 ||
+                  b.dryCount > 0 ||
+                  b.iron ||
+                  b.fold,
+            );
+      case BookingPane.products:
+        return state.orderProductCounts.isNotEmpty;
+      case BookingPane.receipt:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Consumer<BookingStateNotifier>(
       builder: (context, state, _) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Order Booking'), elevation: 2),
+          appBar: AppBar(
+            title: Text('Order Booking - ${_pageLabels[_currentPage]}'),
+            elevation: 2,
+          ),
           body: Column(
             children: [
-              // Tab/Step indicator
+              // Progress indicator
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 12,
-                ),
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 color: Colors.grey[100],
-                child: SizedBox(
-                  height: 50,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      _buildStepButton(
-                        context,
-                        'Handling',
-                        BookingPane.handling,
-                        state.handling.pickup || state.handling.deliver,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    _pages.length,
+                    (index) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: CircleAvatar(
+                        radius: 16,
+                        backgroundColor: index <= _currentPage
+                            ? Colors.blue
+                            : Colors.grey[300],
+                        child: Text(
+                          '${index + 1}',
+                          style: TextStyle(
+                            color: index <= _currentPage
+                                ? Colors.white
+                                : Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                      _buildStepButton(
-                        context,
-                        'Products',
-                        BookingPane.products,
-                        state.orderProductCounts.isNotEmpty,
-                      ),
-                      _buildStepButton(
-                        context,
-                        'Baskets',
-                        BookingPane.basket,
-                        state.baskets.isNotEmpty &&
-                            state.baskets.any(
-                              (b) =>
-                                  b.washCount > 0 ||
-                                  b.dryCount > 0 ||
-                                  b.iron ||
-                                  b.fold,
-                            ),
-                      ),
-                      _buildStepButton(
-                        context,
-                        'Receipt',
-                        BookingPane.receipt,
-                        state.baskets.isNotEmpty &&
-                            state.baskets.any(
-                              (b) =>
-                                  b.washCount > 0 ||
-                                  b.dryCount > 0 ||
-                                  b.iron ||
-                                  b.fold,
-                            ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-              // Main content
+              // Page content
               Expanded(
-                child: IndexedStack(
-                  index: _paneIndex(state.activePane),
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentPage = index;
+                    });
+                  },
                   children: [
                     const BookingHandlingScreen(),
-                    const BookingProductsScreen(),
                     const BookingBasketsScreen(),
+                    const BookingProductsScreen(),
                     const BookingReceiptPaymentScreen(),
-                    const BookingReceiptPaymentScreen(),
+                  ],
+                ),
+              ),
+              // Navigation buttons
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  border: Border(
+                    top: BorderSide(color: Colors.grey[300]!),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    // Previous button
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed:
+                            _currentPage > 0 ? _goToPreviousPage : null,
+                        style: OutlinedButton.styleFrom(
+                          padding:
+                              const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: const Text('Previous'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // Next button
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _currentPage < _pages.length - 1
+                            ? _canGoNext()
+                                ? _goToNextPage
+                                : null
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          padding:
+                              const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: Text(
+                          _currentPage == _pages.length - 1
+                              ? 'Submit'
+                              : 'Next',
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -120,51 +215,5 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
         );
       },
     );
-  }
-
-  Widget _buildStepButton(
-    BuildContext context,
-    String label,
-    BookingPane pane,
-    bool isCompleted,
-  ) {
-    return Consumer<BookingStateNotifier>(
-      builder: (context, state, _) {
-        final isActive = state.activePane == pane;
-
-        return Padding(
-          padding: const EdgeInsets.only(right: 4),
-          child: ElevatedButton(
-            onPressed: () =>
-                context.read<BookingStateNotifier>().setActivePane(pane),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isActive ? Colors.blue : Colors.grey[300],
-            ),
-            child: Text(
-              label,
-              style: TextStyle(
-                color: isActive ? Colors.white : Colors.black,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  int _paneIndex(BookingPane pane) {
-    switch (pane) {
-      case BookingPane.handling:
-        return 0;
-      case BookingPane.products:
-        return 1;
-      case BookingPane.basket:
-        return 2;
-      case BookingPane.receipt:
-        return 4;
-      default:
-        return 0;
-    }
   }
 }
