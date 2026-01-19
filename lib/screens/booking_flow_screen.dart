@@ -91,11 +91,7 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
       case BookingPane.basket:
         return state.baskets.isNotEmpty &&
             state.baskets.any(
-              (b) =>
-                  b.washCount > 0 ||
-                  b.dryCount > 0 ||
-                  b.iron ||
-                  b.fold,
+              (b) => b.washCount > 0 || b.dryCount > 0 || b.iron || b.fold,
             );
       case BookingPane.products:
         return state.orderProductCounts.isNotEmpty;
@@ -169,20 +165,16 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.grey[50],
-                  border: Border(
-                    top: BorderSide(color: Colors.grey[300]!),
-                  ),
+                  border: Border(top: BorderSide(color: Colors.grey[300]!)),
                 ),
                 child: Row(
                   children: [
                     // Previous button
                     Expanded(
                       child: OutlinedButton(
-                        onPressed:
-                            _currentPage > 0 ? _goToPreviousPage : null,
+                        onPressed: _currentPage > 0 ? _goToPreviousPage : null,
                         style: OutlinedButton.styleFrom(
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                         child: const Text('Previous'),
                       ),
@@ -193,17 +185,14 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
                       child: ElevatedButton(
                         onPressed: _currentPage < _pages.length - 1
                             ? _canGoNext()
-                                ? _goToNextPage
-                                : null
+                                  ? _goToNextPage
+                                  : null
                             : null,
                         style: ElevatedButton.styleFrom(
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                         child: Text(
-                          _currentPage == _pages.length - 1
-                              ? 'Submit'
-                              : 'Next',
+                          _currentPage == _pages.length - 1 ? 'Submit' : 'Next',
                         ),
                       ),
                     ),
