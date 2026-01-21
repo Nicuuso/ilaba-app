@@ -321,7 +321,7 @@ class _BookingReceiptPaymentScreenState
                         ],
 
                         // Loyalty Discount Section
-                        if (receipt.loyaltyPoints >= 3) ...[
+                        if (receipt.loyaltyPoints >= 10) ...[
                           const SizedBox(height: 12),
                           const Divider(),
                           const SizedBox(height: 12),
@@ -363,7 +363,7 @@ class _BookingReceiptPaymentScreenState
                                                 .getAvailableLoyaltyTiers();
                                             if (availableTiers.isEmpty) {
                                               return const Text(
-                                                'Need 3 points for discount',
+                                                'Need 10 points for discount',
                                                 style: TextStyle(fontSize: 11),
                                               );
                                             }
@@ -379,7 +379,7 @@ class _BookingReceiptPaymentScreenState
                                                 final discountAmt =
                                                     receipt.total *
                                                     (percentage / 100);
-                                                final isBestDeal = points == 4;
+                                                final isBestDeal = points == 20;
 
                                                 return Text(
                                                   '• $points points: $percentage% off (Save ₱${discountAmt.toStringAsFixed(2)})${isBestDeal ? ' ⭐ Best' : ''}',

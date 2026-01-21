@@ -95,7 +95,7 @@ class BookingStateNotifier extends ChangeNotifier {
 
   // --- Loyalty System ---
   int loyaltyPointsBalance = 0; // Customer's current points balance
-  int loyaltyPointsUsed = 0; // Points selected for this order (0, 3, or 4)
+  int loyaltyPointsUsed = 0; // Points selected for this order (0, 10, or 20)
   double loyaltyDiscountAmount = 0; // Calculated discount in PHP
   int loyaltyDiscountPercentage = 0; // Discount % (10 or 15)
   bool loyaltyToggleEnabled = false; // User toggled discount ON/OFF
@@ -207,8 +207,8 @@ class BookingStateNotifier extends ChangeNotifier {
     }
 
     // Validate points
-    if (pointsToUse != 3 && pointsToUse != 4) {
-      debugPrint('❌ Invalid loyalty points: $pointsToUse (must be 3 or 4)');
+    if (pointsToUse != 10 && pointsToUse != 20) {
+      debugPrint('❌ Invalid loyalty points: $pointsToUse (must be 10 or 20)');
       return;
     }
 
@@ -222,7 +222,7 @@ class BookingStateNotifier extends ChangeNotifier {
     // Calculate discount
     final receipt = computeReceipt();
     final baseTotal = receipt.total; // Final total
-    final percentage = pointsToUse == 3 ? 10 : 15;
+    final percentage = pointsToUse == 10 ? 10 : 15;
     final discountAmount = baseTotal * (percentage / 100);
 
     loyaltyPointsUsed = pointsToUse;
@@ -239,11 +239,11 @@ class BookingStateNotifier extends ChangeNotifier {
   /// Toggle loyalty discount on/off
   void toggleLoyaltyDiscount() {
     if (!loyaltyToggleEnabled) {
-      // If enabled points selected, use 4-point tier by default
-      if (loyaltyPointsBalance >= 4) {
-        applyLoyaltyDiscount(4);
-      } else if (loyaltyPointsBalance >= 3) {
-        applyLoyaltyDiscount(3);
+      // If enabled points selected, use 20-point tier by default
+      if (loyaltyPointsBalance >= 20) {
+        applyLoyaltyDiscount(20);
+      } else if (loyaltyPointsBalance >= 10) {
+        applyLoyaltyDiscount(10);
       }
     } else {
       resetLoyaltyState();
@@ -262,11 +262,11 @@ class BookingStateNotifier extends ChangeNotifier {
   /// Get available loyalty tiers for UI display
   Map<int, int> getAvailableLoyaltyTiers() {
     final tiers = <int, int>{}; // points -> percentage
-    if (loyaltyPointsBalance >= 4) {
-      tiers[4] = 15; // Best deal
+    if (loyaltyPointsBalance >= 20) {
+      tiers[20] = 15; // Best deal
     }
-    if (loyaltyPointsBalance >= 3) {
-      tiers[3] = 10;
+    if (loyaltyPointsBalance >= 10) {
+      tiers[10] = 10;
     }
     return tiers;
   }
