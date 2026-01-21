@@ -19,7 +19,7 @@ class OrderPayloadBuilder {
     for (final entry in orderProductCounts.entries) {
       final productId = entry.key;
       final quantity = entry.value;
-      
+
       final product = products.firstWhere(
         (p) => p.id == productId,
         orElse: () => throw Exception('Product $productId not found'),
@@ -65,7 +65,8 @@ class OrderPayloadBuilder {
             multiplier: basket.washCount,
             ratePerKg: service.ratePerKg,
             subtotal: subtotal,
-            durationInMinutes: (service.baseDurationMinutes * basket.washCount).toInt(),
+            durationInMinutes: (service.baseDurationMinutes * basket.washCount)
+                .toInt(),
           ),
         );
         basketTotal += subtotal;
@@ -84,7 +85,8 @@ class OrderPayloadBuilder {
             multiplier: basket.dryCount,
             ratePerKg: service.ratePerKg,
             subtotal: subtotal,
-            durationInMinutes: (service.baseDurationMinutes * basket.dryCount).toInt(),
+            durationInMinutes: (service.baseDurationMinutes * basket.dryCount)
+                .toInt(),
           ),
         );
         basketTotal += subtotal;
@@ -94,7 +96,8 @@ class OrderPayloadBuilder {
       if (basket.spinCount > 0) {
         try {
           final service = _findService(services, 'spin', false);
-          final subtotal = basket.weightKg * service.ratePerKg * basket.spinCount;
+          final subtotal =
+              basket.weightKg * service.ratePerKg * basket.spinCount;
           basketServices.add(
             OrderService(
               id: _generateId(),
@@ -104,7 +107,8 @@ class OrderPayloadBuilder {
               multiplier: basket.spinCount,
               ratePerKg: service.ratePerKg,
               subtotal: subtotal,
-              durationInMinutes: (service.baseDurationMinutes * basket.spinCount).toInt(),
+              durationInMinutes:
+                  (service.baseDurationMinutes * basket.spinCount).toInt(),
             ),
           );
           basketTotal += subtotal;
@@ -159,6 +163,10 @@ class OrderPayloadBuilder {
             services: basketServices,
             total: basketTotal,
             basketNotes: basket.notes.isNotEmpty ? basket.notes : null,
+            approvalStatus: 'pending', // Mobile app orders need approval
+            approvedAt: null,
+            approvedBy: null,
+            rejectionReason: null,
           ),
         );
         basketSubtotal += basketTotal;
@@ -193,10 +201,12 @@ class OrderPayloadBuilder {
 
     // 4. Calculate totals with 12% VAT
     const taxRate = 0.12;
-    final subtotalBeforeTax = productSubtotal + basketSubtotal + 
-        (basketsArray.isNotEmpty ? serviceFee : 0) + 
+    final subtotalBeforeTax =
+        productSubtotal +
+        basketSubtotal +
+        (basketsArray.isNotEmpty ? serviceFee : 0) +
         handlingFee;
-    
+
     // Tax is calculated on subtotal
     final taxIncluded = subtotalBeforeTax * (taxRate / (1 + taxRate));
     final total = subtotalBeforeTax;
@@ -204,10 +214,10 @@ class OrderPayloadBuilder {
     // 5. Build payment object
     final payment = OrderPayment(
       method: 'gcash',
-      paymentStatus: 'pending',
+      paymentStatus: 'pending', // Pending until cashier approves
       amountPaid: total,
       changeAmount: 0,
-      completedAt: null,
+      completedAt: null, // Will be set when cashier approves
       gcashReceipt: GCashReceipt(
         screenshotUrl: null,
         transactionId: null,
@@ -235,13 +245,14 @@ class OrderPayloadBuilder {
       baskets: basketsArray,
       fees: fees,
       totals: PaymentTotals(
-        productSubtotal: productSubtotal,
-        basketSubtotal: basketSubtotal,
-        serviceFee: basketsArray.isNotEmpty ? serviceFee : 0,
-        handlingFee: handlingFee,
+        productSubtotal: productSubtotal > 0 ? productSubtotal : null,
+        basketSubtotal: basketSubtotal > 0 ? basketSubtotal : null,
+        serviceFee: basketsArray.isNotEmpty ? serviceFee : null,
+        handlingFee: includeDelivery ? handlingFee : null,
         taxRate: taxRate,
         taxIncluded: taxIncluded,
         total: total,
+        vatModel: 'inclusive',
       ),
       payment: payment,
       auditLog: auditLog,
@@ -258,24 +269,36 @@ class OrderPayloadBuilder {
   }) {
     return OrderHandling(
       pickup: HandlingLocation(
-        address: (pickupEnabled && pickupAddress != null && pickupAddress.isNotEmpty)
+        address:
+            (pickupEnabled && pickupAddress != null && pickupAddress.isNotEmpty)
             ? pickupAddress
             : null,
         latitude: null,
         longitude: null,
-        notes: (instructions != null && instructions.isNotEmpty) ? instructions : null,
-        status: (pickupEnabled && pickupAddress != null && pickupAddress.isNotEmpty)
+        notes: (instructions != null && instructions.isNotEmpty)
+            ? instructions
+            : null,
+        status:
+            (pickupEnabled && pickupAddress != null && pickupAddress.isNotEmpty)
             ? 'pending'
             : 'skipped',
       ),
       delivery: HandlingLocation(
-        address: (deliveryEnabled && deliveryAddress != null && deliveryAddress.isNotEmpty)
+        address:
+            (deliveryEnabled &&
+                deliveryAddress != null &&
+                deliveryAddress.isNotEmpty)
             ? deliveryAddress
             : null,
         latitude: null,
         longitude: null,
-        notes: (instructions != null && instructions.isNotEmpty) ? instructions : null,
-        status: (deliveryEnabled && deliveryAddress != null && deliveryAddress.isNotEmpty)
+        notes: (instructions != null && instructions.isNotEmpty)
+            ? instructions
+            : null,
+        status:
+            (deliveryEnabled &&
+                deliveryAddress != null &&
+                deliveryAddress.isNotEmpty)
             ? 'pending'
             : 'skipped',
       ),
@@ -289,9 +312,7 @@ class OrderPayloadBuilder {
     bool isPremium,
   ) {
     try {
-      final service = services.firstWhere(
-        (s) => s.serviceType == serviceType,
-      );
+      final service = services.firstWhere((s) => s.serviceType == serviceType);
       return service;
     } catch (e) {
       throw Exception('Service type "$serviceType" not found');

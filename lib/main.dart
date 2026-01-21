@@ -29,7 +29,7 @@ Future<void> main() async {
   } catch (e) {
     debugPrint('Error initializing Supabase: $e');
   }
-
+  
   runApp(const MyApp());
 }
 

@@ -7,6 +7,7 @@
 **Root Cause**: `getProducts()` in `pos_service_impl.dart` was selecting wrong column names and not filtering by `is_active`
 
 **Before (Broken)**:
+
 ```dart
 final response = await _supabase
     .from('products')
@@ -16,6 +17,7 @@ final response = await _supabase
 ```
 
 **After (Fixed)**:
+
 ```dart
 final response = await _supabase
     .from('products')
@@ -25,6 +27,7 @@ final response = await _supabase
 ```
 
 **Key Changes**:
+
 - ✅ Select `quantity` instead of `unit` (matches database schema)
 - ✅ Select `is_active` column
 - ✅ Added `.eq('is_active', true)` filter to only fetch active products
@@ -36,6 +39,7 @@ final response = await _supabase
 **Root Cause**: The filter was correct but there's no validation that inactive services aren't being returned. Added verification logic.
 
 **Before**:
+
 ```dart
 final response = await _supabase
     .from('services')
@@ -45,6 +49,7 @@ final response = await _supabase
 ```
 
 **After (Enhanced)**:
+
 ```dart
 final response = await _supabase
     .from('services')
@@ -64,6 +69,7 @@ if (inactiveCount > 0) {
 ## Database Schema Reference
 
 ### Products Table
+
 ```sql
 CREATE TABLE public.products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -81,6 +87,7 @@ CREATE TABLE public.products (
 ```
 
 ### Services Table
+
 ```sql
 CREATE TABLE public.services (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -102,6 +109,7 @@ CREATE TABLE public.services (
 When app starts or booking screen loads, check Flutter debug console for:
 
 ### ✅ Successful Products Load:
+
 ```
 📦 BookingStateNotifier: Loading products...
 📦 Fetching active products from Supabase...
@@ -112,6 +120,7 @@ When app starts or booking screen loads, check Flutter debug console for:
 ```
 
 ### ✅ Successful Services Load:
+
 ```
 🧹 BookingStateNotifier: Loading laundry services...
 🧹 Fetching active laundry services from Supabase...
@@ -123,6 +132,7 @@ When app starts or booking screen loads, check Flutter debug console for:
 ```
 
 ### ❌ Error Indicators:
+
 ```
 ❌ Failed to fetch products: [Error message]
 ❌ Failed to fetch services: [Error message]
@@ -134,6 +144,7 @@ When app starts or booking screen loads, check Flutter debug console for:
 ## Troubleshooting Checklist
 
 ### Products Not Loading?
+
 - [ ] Check that `is_active = true` in products table for test data
 - [ ] Verify database schema matches (column names: `item_name`, `quantity`, not `unit`)
 - [ ] Check Supabase RLS (Row Level Security) policies aren't blocking SELECT
@@ -141,6 +152,7 @@ When app starts or booking screen loads, check Flutter debug console for:
 - [ ] Check debug logs for exact error message
 
 ### Services Still Showing as Inactive?
+
 - [ ] Verify all service records have `is_active = true`
 - [ ] Check that LaundryService model correctly parses `is_active` field
 - [ ] Run: `SELECT COUNT(*) FROM services WHERE is_active = false;` to find inactive ones
@@ -172,6 +184,7 @@ SELECT id, name FROM services WHERE is_active = false;
 ## Testing the Fix
 
 ### In Flutter:
+
 1. Clear app cache: `flutter clean`
 2. Run app: `flutter run`
 3. Navigate to booking screen
@@ -181,6 +194,7 @@ SELECT id, name FROM services WHERE is_active = false;
 7. Confirm no inactive items show up
 
 ### Quick Verification:
+
 - [ ] Products screen shows items (not empty)
 - [ ] Service multipliers (wash, dry, etc.) work when adding basket
 - [ ] All debug logs show `✅` success indicators
@@ -191,6 +205,7 @@ SELECT id, name FROM services WHERE is_active = false;
 ## Code Changes Summary
 
 **Files Modified**:
+
 1. `lib/services/pos_service_impl.dart`:
    - ✅ Updated `getProducts()` to select correct columns and filter by `is_active`
    - ✅ Updated `getServices()` with verification warning for inactive items

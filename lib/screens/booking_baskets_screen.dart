@@ -28,57 +28,87 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
 
   int _calculateBasketDuration(Basket basket, List<LaundryService> services) {
     int duration = 0;
-    
+
     if (basket.washCount > 0) {
       final service = services.firstWhere(
         (s) => s.serviceType == 'wash',
         orElse: () => LaundryService(
-          id: '', serviceType: '', name: '', description: '', baseDurationMinutes: 0, ratePerKg: 0, isActive: false,
+          id: '',
+          serviceType: '',
+          name: '',
+          description: '',
+          baseDurationMinutes: 0,
+          ratePerKg: 0,
+          isActive: false,
         ),
       );
       duration += service.baseDurationMinutes * basket.washCount;
     }
-    
+
     if (basket.dryCount > 0) {
       final service = services.firstWhere(
         (s) => s.serviceType == 'dry',
         orElse: () => LaundryService(
-          id: '', serviceType: '', name: '', description: '', baseDurationMinutes: 0, ratePerKg: 0, isActive: false,
+          id: '',
+          serviceType: '',
+          name: '',
+          description: '',
+          baseDurationMinutes: 0,
+          ratePerKg: 0,
+          isActive: false,
         ),
       );
       duration += service.baseDurationMinutes * basket.dryCount;
     }
-    
+
     if (basket.spinCount > 0) {
       final service = services.firstWhere(
         (s) => s.serviceType == 'spin',
         orElse: () => LaundryService(
-          id: '', serviceType: '', name: '', description: '', baseDurationMinutes: 0, ratePerKg: 0, isActive: false,
+          id: '',
+          serviceType: '',
+          name: '',
+          description: '',
+          baseDurationMinutes: 0,
+          ratePerKg: 0,
+          isActive: false,
         ),
       );
       duration += service.baseDurationMinutes * basket.spinCount;
     }
-    
+
     if (basket.iron) {
       final service = services.firstWhere(
         (s) => s.serviceType == 'iron',
         orElse: () => LaundryService(
-          id: '', serviceType: '', name: '', description: '', baseDurationMinutes: 0, ratePerKg: 0, isActive: false,
+          id: '',
+          serviceType: '',
+          name: '',
+          description: '',
+          baseDurationMinutes: 0,
+          ratePerKg: 0,
+          isActive: false,
         ),
       );
       duration += service.baseDurationMinutes;
     }
-    
+
     if (basket.fold) {
       final service = services.firstWhere(
         (s) => s.serviceType == 'fold',
         orElse: () => LaundryService(
-          id: '', serviceType: '', name: '', description: '', baseDurationMinutes: 0, ratePerKg: 0, isActive: false,
+          id: '',
+          serviceType: '',
+          name: '',
+          description: '',
+          baseDurationMinutes: 0,
+          ratePerKg: 0,
+          isActive: false,
         ),
       );
       duration += service.baseDurationMinutes;
     }
-    
+
     return duration;
   }
 
@@ -86,7 +116,9 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
   bool _isServiceActive(List<LaundryService> services, String serviceType) {
     try {
       final service = services.firstWhere(
-        (s) => s.serviceType == serviceType && !s.name.toLowerCase().contains('premium'),
+        (s) =>
+            s.serviceType == serviceType &&
+            !s.name.toLowerCase().contains('premium'),
       );
       return service.isActive;
     } catch (e) {
@@ -161,43 +193,54 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
                         final isActive = state.activeBasketIndex == index;
                         return Padding(
                           padding: const EdgeInsets.only(right: 8),
-                          child: GestureDetector(
-                            onLongPress: state.baskets.length > 1
-                                ? () {
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isActive ? Colors.blue : Colors.grey[200],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
                                     context
                                         .read<BookingStateNotifier>()
-                                        .deleteBasket(index);
-                                  }
-                                : null,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isActive
-                                    ? Colors.blue
-                                    : Colors.grey[200],
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: GestureDetector(
-                                onTap: () {
-                                  context
-                                      .read<BookingStateNotifier>()
-                                      .setActiveBasketIndex(index);
-                                },
-                                child: Text(
-                                  state.baskets[index].name,
-                                  style: TextStyle(
-                                    color: isActive
-                                        ? Colors.white
-                                        : Colors.black,
-                                    fontWeight: isActive
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
+                                        .setActiveBasketIndex(index);
+                                  },
+                                  child: Text(
+                                    state.baskets[index].name,
+                                    style: TextStyle(
+                                      color: isActive
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontWeight: isActive
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                    ),
                                   ),
                                 ),
-                              ),
+                                if (state.baskets.length > 1) ...[
+                                  const SizedBox(width: 8),
+                                  GestureDetector(
+                                    onTap: () {
+                                      context
+                                          .read<BookingStateNotifier>()
+                                          .deleteBasket(index);
+                                    },
+                                    child: Icon(
+                                      Icons.close,
+                                      size: 18,
+                                      color: isActive
+                                          ? Colors.white
+                                          : Colors.black87,
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
                         );
@@ -213,6 +256,58 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
                     ],
                   ),
                 ),
+
+                const SizedBox(height: 16),
+
+                // Unfinished baskets warning
+                ...state.baskets
+                    .where((b) {
+                      final hasWeight = b.weightKg > 0;
+                      final hasNoServices =
+                          b.washCount == 0 &&
+                          b.dryCount == 0 &&
+                          b.spinCount == 0 &&
+                          !b.iron &&
+                          !b.fold;
+                      return hasWeight && hasNoServices;
+                    })
+                    .map((basket) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.orange[50],
+                            border: Border.all(
+                              color: Colors.orange[300]!,
+                              width: 1,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.warning_amber,
+                                color: Colors.orange[700],
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  '${basket.name} has ${basket.weightKg.toStringAsFixed(1)}kg but no services selected',
+                                  style: TextStyle(
+                                    color: Colors.orange[900],
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    })
+                    .toList(),
 
                 const SizedBox(height: 20),
 
@@ -246,7 +341,7 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
                                 .read<BookingStateNotifier>()
                                 .updateActiveBasket(
                                   activeBasket.copyWith(
-                                    weightKg: activeBasket.weightKg - 0.5,
+                                    weightKg: activeBasket.weightKg - 8,
                                   ),
                                 );
                           }
@@ -260,7 +355,7 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
                               .read<BookingStateNotifier>()
                               .updateActiveBasket(
                                 activeBasket.copyWith(
-                                  weightKg: activeBasket.weightKg + 0.5,
+                                  weightKg: activeBasket.weightKg + 8,
                                 ),
                               );
                         },
@@ -369,7 +464,9 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
                   },
                   onPremiumChanged: null,
                   hasPremium: false,
-                  disabled: activeBasket.weightKg == 0 || !_isServiceActive(state.services, 'spin'),
+                  disabled:
+                      activeBasket.weightKg == 0 ||
+                      !_isServiceActive(state.services, 'spin'),
                   weight: activeBasket.weightKg,
                 ),
                 const SizedBox(height: 8),
@@ -392,7 +489,9 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
                   },
                   onPremiumChanged: null,
                   hasPremium: false,
-                  disabled: activeBasket.weightKg == 0 || !_isServiceActive(state.services, 'iron'),
+                  disabled:
+                      activeBasket.weightKg == 0 ||
+                      !_isServiceActive(state.services, 'iron'),
                   isToggle: true,
                   weight: activeBasket.weightKg,
                 ),
@@ -416,7 +515,9 @@ class _BookingBasketsScreenState extends State<BookingBasketsScreen> {
                   },
                   onPremiumChanged: null,
                   hasPremium: false,
-                  disabled: activeBasket.weightKg == 0 || !_isServiceActive(state.services, 'fold'),
+                  disabled:
+                      activeBasket.weightKg == 0 ||
+                      !_isServiceActive(state.services, 'fold'),
                   isToggle: true,
                   weight: activeBasket.weightKg,
                 ),
@@ -621,7 +722,8 @@ class _ServiceListItem extends StatelessWidget {
 
     // Determine if the +/- buttons should be disabled
     // Buttons are disabled if: weight is 0 OR the current variant (basic/premium) is inactive
-    final buttonsDisabled = weight == 0 ||
+    final buttonsDisabled =
+        weight == 0 ||
         (!isPremium && !_isCurrentVariantActive()) ||
         (isPremium && !_isPremiumVariantActive());
 
@@ -655,7 +757,7 @@ class _ServiceListItem extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                '₱${currentPrice.toStringAsFixed(0)}/kg',
+                '₱${currentPrice.toStringAsFixed(2)}/kg',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -721,7 +823,9 @@ class _ServiceListItem extends StatelessWidget {
               // Premium checkbox - always clickable if premium variant exists
               if (hasPremium)
                 GestureDetector(
-                  onTap: premiumToggleDisabled ? null : () => onPremiumChanged?.call(!isPremium),
+                  onTap: premiumToggleDisabled
+                      ? null
+                      : () => onPremiumChanged?.call(!isPremium),
                   child: Row(
                     children: [
                       SizedBox(
@@ -743,7 +847,9 @@ class _ServiceListItem extends StatelessWidget {
                         'Premium',
                         style: TextStyle(
                           fontSize: 13,
-                          color: premiumToggleDisabled ? Colors.grey[600] : Colors.purple,
+                          color: premiumToggleDisabled
+                              ? Colors.grey[600]
+                              : Colors.purple,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -772,12 +878,18 @@ class _ServiceListItem extends StatelessWidget {
   bool _isBasicVariantActive() {
     try {
       final service = services.firstWhere(
-        (s) => s.serviceType == serviceType && !s.name.toLowerCase().contains('premium'),
+        (s) =>
+            s.serviceType == serviceType &&
+            !s.name.toLowerCase().contains('premium'),
       );
-      debugPrint('✓ _isBasicVariantActive($serviceType): Found "${service.name}" (isActive=${service.isActive})');
+      debugPrint(
+        '✓ _isBasicVariantActive($serviceType): Found "${service.name}" (isActive=${service.isActive})',
+      );
       return service.isActive;
     } catch (e) {
-      debugPrint('✗ _isBasicVariantActive($serviceType): No basic variant found. Available services: ${services.where((s) => s.serviceType == serviceType).map((s) => "${s.name} (active=${s.isActive})").join(", ")}');
+      debugPrint(
+        '✗ _isBasicVariantActive($serviceType): No basic variant found. Available services: ${services.where((s) => s.serviceType == serviceType).map((s) => "${s.name} (active=${s.isActive})").join(", ")}',
+      );
       return false;
     }
   }
@@ -788,12 +900,18 @@ class _ServiceListItem extends StatelessWidget {
   bool _isPremiumVariantActive() {
     try {
       final service = services.firstWhere(
-        (s) => s.serviceType == serviceType && s.name.toLowerCase().contains('premium'),
+        (s) =>
+            s.serviceType == serviceType &&
+            s.name.toLowerCase().contains('premium'),
       );
-      debugPrint('✓ _isPremiumVariantActive($serviceType): Found "${service.name}" (isActive=${service.isActive})');
+      debugPrint(
+        '✓ _isPremiumVariantActive($serviceType): Found "${service.name}" (isActive=${service.isActive})',
+      );
       return service.isActive;
     } catch (e) {
-      debugPrint('✗ _isPremiumVariantActive($serviceType): No premium variant found. Available services: ${services.where((s) => s.serviceType == serviceType).map((s) => "${s.name} (active=${s.isActive})").join(", ")}');
+      debugPrint(
+        '✗ _isPremiumVariantActive($serviceType): No premium variant found. Available services: ${services.where((s) => s.serviceType == serviceType).map((s) => "${s.name} (active=${s.isActive})").join(", ")}',
+      );
       return false;
     }
   }
@@ -802,7 +920,9 @@ class _ServiceListItem extends StatelessWidget {
   bool _hasPremiumVariant() {
     try {
       services.firstWhere(
-        (s) => s.serviceType == serviceType && s.name.toLowerCase().contains('premium'),
+        (s) =>
+            s.serviceType == serviceType &&
+            s.name.toLowerCase().contains('premium'),
       );
       return true;
     } catch (e) {

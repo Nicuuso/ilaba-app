@@ -3,20 +3,24 @@
 ## Problem 1: Premium Service Disabling Logic
 
 ### Root Cause
+
 The `disabled` flag was being applied to the entire `_ServiceListItem` widget, which disabled both the +/- buttons AND the premium checkbox together. This prevented users from switching to premium when the basic variant was inactive.
 
 ### Solution
+
 Refactored `_ServiceListItem` to have separate disabled logic:
 
 #### Before (Broken):
+
 ```dart
-disabled: activeBasket.weightKg == 0 || 
+disabled: activeBasket.weightKg == 0 ||
          (!activeBasket.washPremium && !_isServiceActive(...)) ||
          (activeBasket.washPremium && !_isPremiumServiceActive(...))
 // This disabled the entire widget, including the premium checkbox
 ```
 
 #### After (Fixed):
+
 ```dart
 // Buttons disabled based on current variant availability
 final buttonsDisabled = weight == 0 ||
@@ -28,6 +32,7 @@ final premiumToggleDisabled = !_hasPremiumVariant();
 ```
 
 ### Behavior Now:
+
 1. **If Wash (basic) is inactive but Wash (Premium) is active:**
    - +/- buttons: **DISABLED** (can't add more basic wash)
    - Premium checkbox: **ENABLED** (can switch to premium)
@@ -41,6 +46,7 @@ final premiumToggleDisabled = !_hasPremiumVariant();
    - Premium checkbox: **DISABLED** (nowhere to switch to)
 
 ### Key Helper Methods in Widget:
+
 ```dart
 /// Check if the current variant (basic if not premium, premium if premium flag is true) is active
 bool _isCurrentVariantActive() {
@@ -69,15 +75,19 @@ bool _hasPremiumVariant() {
 ## Problem 2: Product Image Loading
 
 ### Root Cause
+
 The Stack-based approach was overly complex and the loading state management with `setState` inside `loadingBuilder` was problematic. The image might not be displaying due to URL format issues or the complex nested structure.
 
 ### Solution
+
 Simplified to a clean, straightforward approach using Flutter's built-in `Image.network` with:
+
 - `loadingBuilder` for progress indicator
 - `errorBuilder` for failure feedback
 - `ClipRRect` for rounded corners
 
 #### Before (Complex/Broken):
+
 ```dart
 child: Stack(
   fit: StackFit.expand,
@@ -107,6 +117,7 @@ child: Stack(
 ```
 
 #### After (Clean/Working):
+
 ```dart
 child: ClipRRect(
   borderRadius: BorderRadius.circular(8),
@@ -145,6 +156,7 @@ child: ClipRRect(
 ```
 
 ### Benefits:
+
 ✅ Simpler, more maintainable code
 ✅ No need for `_imageLoadingStates` map
 ✅ Built-in progress tracking shows download percentage
@@ -157,6 +169,7 @@ child: ClipRRect(
 ## Testing Checklist
 
 ### Premium Services Fix
+
 - [x] Create basket with weight > 0
 - [x] Verify basic service (+/-) buttons are disabled when basic variant is inactive
 - [x] Verify premium checkbox is still clickable when basic is inactive
@@ -165,6 +178,7 @@ child: ClipRRect(
 - [x] If premium doesn't exist, premium checkbox should be disabled
 
 ### Product Images Fix
+
 - [x] Products with valid image URLs should load with spinner
 - [x] Spinner disappears when image loads
 - [x] Broken URLs show error icon + message
@@ -175,6 +189,7 @@ child: ClipRRect(
 ---
 
 ## Files Modified
+
 1. `lib/screens/booking_baskets_screen.dart`
    - Refactored `_ServiceListItem` widget
    - Split `disabled` logic into `buttonsDisabled` and `premiumToggleDisabled`
@@ -187,4 +202,3 @@ child: ClipRRect(
    - Improved `loadingBuilder` with progress indicator
    - Better error handling in `errorBuilder`
    - Used `ClipRRect` for clean rounded corners
-

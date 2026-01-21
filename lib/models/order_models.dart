@@ -2,6 +2,25 @@
 /// Matches the backend order structure for /api/orders/transactional-create
 library;
 
+import 'dart:math';
+
+// Simple UUID-like ID generator (matches UUIDs when displayed)
+String _generateId() {
+  const String chars = '0123456789abcdef';
+  final random = Random();
+  final buffer = StringBuffer();
+  
+  for (var i = 0; i < 36; i++) {
+    if (i == 8 || i == 13 || i == 18 || i == 23) {
+      buffer.write('-');
+    } else {
+      buffer.write(chars[random.nextInt(16)]);
+    }
+  }
+  
+  return buffer.toString();
+}
+
 // ============================================================================
 // BREAKDOWN MODELS
 // ============================================================================
@@ -94,6 +113,11 @@ class OrderBasket {
   final String? basketNotes;
   final List<OrderService> services;
   final double total;
+  final String?
+  approvalStatus; // "pending" | "approved" | "rejected" | null (for web)
+  final String? approvedAt;
+  final String? approvedBy;
+  final String? rejectionReason;
 
   OrderBasket({
     required this.basketNumber,
@@ -101,6 +125,10 @@ class OrderBasket {
     required this.services,
     required this.total,
     this.basketNotes,
+    this.approvalStatus,
+    this.approvedAt,
+    this.approvedBy,
+    this.rejectionReason,
   });
 
   Map<String, dynamic> toJson() {
@@ -110,6 +138,10 @@ class OrderBasket {
       'basket_notes': basketNotes,
       'services': services.map((s) => s.toJson()).toList(),
       'total': total,
+      'approval_status': approvalStatus,
+      'approved_at': approvedAt,
+      'approved_by': approvedBy,
+      'rejection_reason': rejectionReason,
     };
   }
 }
@@ -138,33 +170,36 @@ class OrderFee {
 }
 
 class PaymentTotals {
-  final double productSubtotal;
-  final double basketSubtotal;
-  final double serviceFee;
-  final double handlingFee;
+  final double? productSubtotal;
+  final double? basketSubtotal;
+  final double? serviceFee;
+  final double? handlingFee;
   final double taxRate;
   final double taxIncluded;
   final double total;
+  final String vatModel; // "inclusive" by default
 
   PaymentTotals({
-    required this.productSubtotal,
-    required this.basketSubtotal,
-    required this.serviceFee,
-    required this.handlingFee,
+    this.productSubtotal,
+    this.basketSubtotal,
+    this.serviceFee,
+    this.handlingFee,
     required this.taxRate,
     required this.taxIncluded,
     required this.total,
+    this.vatModel = 'inclusive',
   });
 
   Map<String, dynamic> toJson() {
     return {
-      'product_subtotal': productSubtotal,
-      'basket_subtotal': basketSubtotal,
+      'subtotal_products': productSubtotal,
+      'subtotal_services': basketSubtotal,
       'service_fee': serviceFee,
-      'handling_fee': handlingFee,
-      'tax_rate': taxRate,
-      'tax_included': taxIncluded,
-      'total': total,
+      'handling': handlingFee,
+      'vat_rate': taxRate,
+      'vat_amount': taxIncluded,
+      'vat_model': vatModel,
+      'grand_total': total,
     };
   }
 }
@@ -259,7 +294,7 @@ class OrderBreakdown {
       'items': items.map((i) => i.toJson()).toList(),
       'baskets': baskets.map((b) => b.toJson()).toList(),
       'fees': fees.map((f) => f.toJson()).toList(),
-      'totals': totals.toJson(),
+      'summary': totals.toJson(),
       'payment': payment.toJson(),
       'audit_log': auditLog.map((a) => a.toJson()).toList(),
     };
@@ -325,14 +360,10 @@ class OrderHandling {
 
 class CustomerData {
   final String id;
-  final String phoneNumber;
-  final String emailAddress;
+  final String? phoneNumber;
+  final String? emailAddress;
 
-  CustomerData({
-    required this.id,
-    required this.phoneNumber,
-    required this.emailAddress,
-  });
+  CustomerData({required this.id, this.phoneNumber, this.emailAddress});
 
   Map<String, dynamic> toJson() {
     return {
@@ -343,37 +374,233 @@ class CustomerData {
   }
 }
 
-class CreateOrderPayload {
-  final String source;
-  final String customerId;
-  final String? cashierId;
-  final String status;
-  final double totalAmount;
-  final String? orderNote;
-  final OrderBreakdown breakdown;
-  final OrderHandling handling;
+// ============================================================================
+// API PAYLOAD MODELS (for backend endpoint)
+// ============================================================================
 
-  CreateOrderPayload({
-    required this.source,
-    required this.customerId,
-    required this.breakdown,
-    required this.handling,
-    required this.totalAmount,
-    this.cashierId,
-    this.status = 'pending',
-    this.orderNote,
+class BackendServicePayload {
+  final String serviceId;
+  final String serviceName;
+  final double rate;
+  final double subtotal;
+
+  BackendServicePayload({
+    required this.serviceId,
+    required this.serviceName,
+    required this.rate,
+    required this.subtotal,
   });
 
   Map<String, dynamic> toJson() {
     return {
+      'service_id': serviceId,
+      'service_name': serviceName,
+      'rate': rate,
+      'subtotal': subtotal,
+    };
+  }
+}
+
+class BackendBasketPayload {
+  final double weight;
+  final double subtotal;
+  final String? notes;
+  final List<BackendServicePayload> services;
+
+  BackendBasketPayload({
+    required this.weight,
+    required this.subtotal,
+    required this.services,
+    this.notes,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'weight': weight,
+      'subtotal': subtotal,
+      'notes': notes,
+      'services': services.map((s) => s.toJson()).toList(),
+    };
+  }
+}
+
+class BackendProductPayload {
+  final String productId;
+  final int quantity;
+  final double unitPrice;
+  final double subtotal;
+
+  BackendProductPayload({
+    required this.productId,
+    required this.quantity,
+    required this.unitPrice,
+    required this.subtotal,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'product_id': productId,
+      'quantity': quantity,
+      'unit_price': unitPrice,
+      'subtotal': subtotal,
+    };
+  }
+}
+
+class CreateOrderPayload {
+  final String customerId;
+  final double total;
+  final List<BackendBasketPayload> baskets;
+  final List<BackendProductPayload> products;
+  final String? pickupAddress;
+  final String? deliveryAddress;
+  final double shippingFee;
+  final String source;
+  final String? gcashReceiptUrl;
+
+  CreateOrderPayload({
+    required this.customerId,
+    required this.total,
+    required this.baskets,
+    required this.products,
+    this.pickupAddress,
+    this.deliveryAddress,
+    this.shippingFee = 0,
+    this.source = 'app',
+    this.gcashReceiptUrl,
+  });
+
+  Map<String, dynamic> toJson() {
+    // Calculate totals
+    final subtotalProducts = products.fold(0.0, (sum, p) => sum + p.subtotal);
+    final subtotalServices = baskets.fold(0.0, (sum, b) => sum + b.subtotal);
+    final serviceFee = baskets.isNotEmpty ? 10.0 : 0.0; // Service fee for baskets
+    final vatAmount = total * (12 / 112); // 12% VAT (inclusive model)
+
+    // Build handling JSONB structure (matches POS format)
+    final handling = {
+      'pickup': {
+        'address': pickupAddress ?? '',
+        'latitude': null,
+        'longitude': null,
+        'notes': null,
+        'status': 'pending',
+        'started_at': null,
+        'completed_at': null,
+        'completed_by': null,
+        'duration_in_minutes': null,
+      },
+      'delivery': {
+        'address': deliveryAddress,
+        'latitude': null,
+        'longitude': null,
+        'notes': null,
+        'status': deliveryAddress != null ? 'pending' : 'skipped',
+        'started_at': null,
+        'completed_at': null,
+        'completed_by': null,
+        'duration_in_minutes': null,
+      },
+    };
+
+    // Build breakdown JSONB structure (matches POS format)
+    final breakdown = {
+      'items': products.map((p) {
+        return {
+          'id': _generateId(),
+          'discount': {'amount': 0, 'reason': null},
+          'quantity': p.quantity,
+          'subtotal': p.subtotal,
+          'product_id': p.productId,
+          'unit_price': p.unitPrice,
+          'product_name': '', // Product name not available in payload
+        };
+      }).toList(),
+      'baskets': baskets.asMap().entries.map((entry) {
+        final index = entry.key + 1;
+        final b = entry.value;
+        return {
+          'id': _generateId(),
+          'total': b.subtotal,
+          'status': 'pending',
+          'weight': b.weight,
+          'services': b.services.map((s) {
+            return {
+              'id': _generateId(),
+              'status': 'pending',
+              'subtotal': s.subtotal,
+              'is_premium': false,
+              'multiplier': 1,
+              'service_id': s.serviceId,
+              'started_at': null,
+              'started_by': null,
+              'rate_per_kg': s.rate,
+              'completed_at': null,
+              'completed_by': null,
+              'service_name': s.serviceName,
+              'duration_in_minutes': null,
+            };
+          }).toList(),
+          'basket_notes': b.notes,
+          'completed_at': null,
+          'basket_number': index,
+        };
+      }).toList(),
+      'payment': {
+        'change': 0.0,
+        'method': 'gcash',
+        'amount_paid': total,
+        'completed_at': DateTime.now().toIso8601String(),
+        'payment_status': 'successful',
+      },
+      'summary': {
+        'handling': shippingFee,
+        'vat_rate': 12,
+        'discounts': null,
+        'vat_model': 'inclusive',
+        'vat_amount': vatAmount,
+        'grand_total': total,
+        'service_fee': serviceFee,
+        'subtotal_products': subtotalProducts,
+        'subtotal_services': subtotalServices,
+      },
+      'audit_log': [
+        {
+          'action': 'created',
+          'timestamp': DateTime.now().toIso8601String(),
+          'changed_by': customerId,
+        }
+      ],
+      'discounts': null,
+      'fees': [
+        if (serviceFee > 0)
+          {
+            'id': _generateId(),
+            'type': 'service_fee',
+            'amount': serviceFee,
+            'description': 'Service fee (${baskets.length} basket${baskets.length > 1 ? 's' : ''})',
+          },
+        if (shippingFee > 0)
+          {
+            'id': _generateId(),
+            'type': 'handling_fee',
+            'amount': shippingFee,
+            'description': 'Delivery Fee',
+          },
+      ],
+    };
+
+    // Return POS format structure
+    return {
       'source': source,
       'customer_id': customerId,
-      'cashier_id': cashierId,
-      'status': status,
-      'total_amount': totalAmount,
-      'order_note': orderNote,
-      'breakdown': breakdown.toJson(),
-      'handling': handling.toJson(),
+      'cashier_id': null, // Mobile orders have no cashier initially
+      'status': 'pending', // Mobile orders start as pending
+      'total_amount': total,
+      'breakdown': breakdown,
+      'handling': handling,
+      'order_note': null,
+      if (gcashReceiptUrl != null) 'gcash_receipt_url': gcashReceiptUrl,
     };
   }
 }
@@ -387,7 +614,19 @@ class CreateOrderRequest {
   Map<String, dynamic> toJson() {
     return {
       'customer': customer.toJson(),
-      'orderPayload': orderPayload.toJson(),
+      'orderPayload': {
+        'customer_id': orderPayload.customerId,
+        'total': orderPayload.total,
+        'baskets': orderPayload.baskets.map((b) => b.toJson()).toList(),
+        'products': orderPayload.products.map((p) => p.toJson()).toList(),
+        'pickupAddress': orderPayload.pickupAddress,
+        'deliveryAddress': orderPayload.deliveryAddress,
+        'shippingFee': orderPayload.shippingFee,
+        'source': orderPayload.source,
+        'payments': [
+          {'amount': orderPayload.total, 'method': 'gcash'},
+        ],
+      },
     };
   }
 }

@@ -4,7 +4,11 @@ import 'package:flutter/foundation.dart';
 import 'package:ilaba/models/order_models.dart';
 
 abstract class OrderCreationService {
-  Future<CreateOrderResponse> createOrder(CreateOrderRequest request);
+  Future<CreateOrderResponse> createOrder(
+    CreateOrderRequest request, {
+    String? phoneNumber,
+    String? emailAddress,
+  });
 }
 
 class OrderCreationServiceImpl implements OrderCreationService {
@@ -12,23 +16,45 @@ class OrderCreationServiceImpl implements OrderCreationService {
   static const String endpoint = '/api/orders/transactional-create';
 
   @override
-  Future<CreateOrderResponse> createOrder(CreateOrderRequest request) async {
+  Future<CreateOrderResponse> createOrder(
+    CreateOrderRequest request, {
+    String? phoneNumber,
+    String? emailAddress,
+  }) async {
     try {
-      debugPrint('📝 Creating order for customer: ${request.customer.id}');
-
-      final payload = request.toJson();
-      debugPrint('📤 Order payload: ${jsonEncode(payload)}');
-
-      final response = await http.post(
-        Uri.parse('$baseUrl$endpoint'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(payload),
-      ).timeout(
-        const Duration(seconds: 30),
-        onTimeout: () => throw Exception('Order creation request timed out'),
+      debugPrint(
+        '👤 Creating order for customer: ${request.orderPayload.customerId}',
       );
+
+      // Build the transactional request with customer and orderPayload in POS format
+      // API expects: { customer: {...}, orderPayload: {...} }
+      final transactionalPayload = {
+        'customer': {
+          'id': request.customer.id,
+          if (request.customer.phoneNumber != null)
+            'phone_number': request.customer.phoneNumber,
+          if (request.customer.emailAddress != null)
+            'email_address': request.customer.emailAddress,
+          // Also include from function params if provided (can override)
+          if (phoneNumber != null) 'phone_number': phoneNumber,
+          if (emailAddress != null) 'email_address': emailAddress,
+        },
+        'orderPayload': request.orderPayload.toJson(), // Uses POS format
+      };
+
+      debugPrint('📤 Transactional payload: ${jsonEncode(transactionalPayload)}');
+
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl$endpoint'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(transactionalPayload),
+          )
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () =>
+                throw Exception('Order creation request timed out'),
+          );
 
       debugPrint('📥 Response status: ${response.statusCode}');
       debugPrint('📥 Response body: ${response.body}');
@@ -47,10 +73,11 @@ class OrderCreationServiceImpl implements OrderCreationService {
         }
       } else {
         final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
-        final errorMsg = errorBody['error'] ?? 
+        final errorMsg =
+            errorBody['error'] ??
             'Order creation failed with status ${response.statusCode}';
         debugPrint('❌ HTTP error: $errorMsg');
-        
+
         // Check for insufficient items error
         if (errorBody['insufficientItems'] != null) {
           return CreateOrderResponse(
@@ -62,7 +89,7 @@ class OrderCreationServiceImpl implements OrderCreationService {
             ),
           );
         }
-        
+
         throw Exception(errorMsg);
       }
     } on http.ClientException catch (e) {

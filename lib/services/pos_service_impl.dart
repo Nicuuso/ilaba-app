@@ -13,21 +13,23 @@ class SupabasePOSService implements POSService {
   Future<List<Product>> getProducts() async {
     try {
       debugPrint('📦 Fetching active products from Supabase...');
-      
+
       final response = await _supabase
           .from('products')
-          .select('id, item_name, quantity, unit_price, reorder_level, unit_cost, is_active, image_url, created_at, last_updated')
+          .select(
+            'id, item_name, quantity, unit_price, reorder_level, unit_cost, is_active, image_url, created_at, last_updated',
+          )
           .eq('is_active', true)
           .order('item_name');
 
       debugPrint('✅ Products response: ${response.length} products found');
-      
-      final products = (response as List)
-          .map((product) {
-            debugPrint('📦 Product: ${product['item_name']} - Active: ${product['is_active']}, Qty: ${product['quantity']}, Image: ${product['image_url']}');
-            return Product.fromJson(product);
-          })
-          .toList();
+
+      final products = (response as List).map((product) {
+        debugPrint(
+          '📦 Product: ${product['item_name']} - Active: ${product['is_active']}, Qty: ${product['quantity']}, Image: ${product['image_url']}',
+        );
+        return Product.fromJson(product);
+      }).toList();
 
       return products;
     } catch (e) {
@@ -41,7 +43,7 @@ class SupabasePOSService implements POSService {
   Future<List<LaundryService>> getServices() async {
     try {
       debugPrint('🧹 Fetching active laundry services from Supabase...');
-      
+
       final response = await _supabase
           .from('services')
           .select(
@@ -51,18 +53,20 @@ class SupabasePOSService implements POSService {
           .order('service_type');
 
       debugPrint('✅ Services response: ${response.length} services found');
-      
-      final services = (response as List)
-          .map((service) {
-            debugPrint('🧹 Service: ${service['name']} (${service['service_type']}) - Active: ${service['is_active']}, Rate: ${service['rate_per_kg']}/kg');
-            return LaundryService.fromJson(service);
-          })
-          .toList();
+
+      final services = (response as List).map((service) {
+        debugPrint(
+          '🧹 Service: ${service['name']} (${service['service_type']}) - Active: ${service['is_active']}, Rate: ${service['rate_per_kg']}/kg',
+        );
+        return LaundryService.fromJson(service);
+      }).toList();
 
       // Verify all returned services are active
       final inactiveCount = services.where((s) => !s.isActive).length;
       if (inactiveCount > 0) {
-        debugPrint('⚠️ WARNING: $inactiveCount inactive services were returned despite filter!');
+        debugPrint(
+          '⚠️ WARNING: $inactiveCount inactive services were returned despite filter!',
+        );
       }
 
       return services;

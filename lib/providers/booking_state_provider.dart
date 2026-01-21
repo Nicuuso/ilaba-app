@@ -88,6 +88,7 @@ class BookingStateNotifier extends ChangeNotifier {
   // --- UI State ---
   HandlingState handling = HandlingState();
   bool isProcessing = false;
+  String? gcashReceiptUrl; // URL of uploaded GCash receipt
 
   // --- Services ---
   late final POSService _posService;
@@ -244,7 +245,9 @@ class BookingStateNotifier extends ChangeNotifier {
 
   /// Update handling state
   void setHandling(HandlingState newHandling) {
-    handling = newHandling;
+    // Auto-enable deliver flag if delivery address is provided
+    final deliver = newHandling.deliveryAddress.isNotEmpty;
+    handling = newHandling.copyWith(deliver: deliver);
     notifyListeners();
   }
 
@@ -396,8 +399,8 @@ class BookingStateNotifier extends ChangeNotifier {
     return ReceiptSummary(
       productSubtotal: productSubtotal,
       basketSubtotal: basketSubtotal,
-      serviceFee: handling.deliver ? 40.0 : 0.0,
-      handlingFee: handling.deliver ? 50.0 : 0.0,
+      serviceFee: serviceFee.toDouble(),
+      handlingFee: handlingFee.toDouble(),
       tax: tax,
       total: total,
       productLines: productLines,
@@ -436,6 +439,19 @@ class BookingStateNotifier extends ChangeNotifier {
       pickup: true,
       pickupAddress: customer?.address ?? '',
     );
+    gcashReceiptUrl = null; // Clear receipt
+    notifyListeners();
+  }
+
+  /// Set the GCash receipt URL after upload
+  void setGCashReceiptUrl(String url) {
+    gcashReceiptUrl = url;
+    notifyListeners();
+  }
+
+  /// Clear the GCash receipt URL
+  void clearGCashReceipt() {
+    gcashReceiptUrl = null;
     notifyListeners();
   }
 }

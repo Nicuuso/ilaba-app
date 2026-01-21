@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:ilaba/providers/booking_state_provider.dart';
 import 'package:ilaba/providers/auth_provider.dart';
-import 'package:ilaba/services/order_payload_builder.dart';
-import 'package:ilaba/services/order_creation_service.dart';
-import 'package:ilaba/models/order_models.dart';
-import 'package:ilaba/screens/order_success_screen.dart';
+import 'package:ilaba/services/gcash_receipt_upload_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class BookingReceiptPaymentScreen extends StatefulWidget {
   const BookingReceiptPaymentScreen({super.key});
@@ -17,13 +16,106 @@ class BookingReceiptPaymentScreen extends StatefulWidget {
 
 class _BookingReceiptPaymentScreenState
     extends State<BookingReceiptPaymentScreen> {
-  bool _gcashPaymentConfirmed = false;
-  bool _isSubmitting = false;
+  bool _isUploading = false;
+  String? _uploadError;
+
+  Future<void> _pickAndUploadImage(BuildContext context) async {
+    try {
+      setState(() {
+        _uploadError = null;
+      });
+
+      final picker = ImagePicker();
+      final image = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80, // Compress to keep under 2MB
+      );
+
+      if (image == null) return;
+
+      // Check file size
+      final fileSize = await image.length();
+      final fileSizeMB = fileSize / 1024 / 1024;
+      if (fileSizeMB > 2) {
+        if (!mounted) return;
+        setState(() {
+          _uploadError =
+              'File too large: ${fileSizeMB.toStringAsFixed(2)}MB (max: 2MB)';
+        });
+        return;
+      }
+
+      setState(() {
+        _isUploading = true;
+      });
+
+      final authProvider = context.read<AuthProvider>();
+      final userId = authProvider.currentUser?.id;
+
+      if (userId == null) {
+        if (!mounted) return;
+        setState(() {
+          _uploadError = 'User not authenticated';
+          _isUploading = false;
+        });
+        return;
+      }
+
+      // Upload to Supabase using Supabase auth user ID (for RLS policy)
+      final supabase = Supabase.instance.client;
+      final supabaseUserId = supabase.auth.currentUser?.id;
+
+      if (supabaseUserId == null) {
+        if (!mounted) return;
+        setState(() {
+          _uploadError = 'Supabase auth not available';
+          _isUploading = false;
+        });
+        return;
+      }
+
+      final url = await GCashReceiptUploadService.uploadReceipt(
+        image.path,
+        supabaseUserId, // Use Supabase auth user ID for RLS policy
+      );
+
+      if (!mounted) return;
+
+      if (url != null) {
+        // Save URL to booking state
+        final bookingState = context.read<BookingStateNotifier>();
+        bookingState.setGCashReceiptUrl(url);
+
+        setState(() {
+          _isUploading = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Receipt uploaded successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        setState(() {
+          _uploadError = 'Upload failed. Please try again.';
+          _isUploading = false;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _uploadError = e.toString();
+        _isUploading = false;
+      });
+      debugPrint('Upload error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<BookingStateNotifier, AuthProvider>(
-      builder: (context, bookingState, authState, _) {
+    return Consumer<BookingStateNotifier>(
+      builder: (context, bookingState, _) {
         final receipt = bookingState.computeReceipt();
         final colorScheme = Theme.of(context).colorScheme;
 
@@ -65,15 +157,13 @@ class _BookingReceiptPaymentScreenState
                           ),
                           ...receipt.productLines.map((line) {
                             return Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 4),
+                              padding: const EdgeInsets.symmetric(vertical: 4),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
-                                    child: Text(
-                                        '${line.name} x${line.qty}'),
+                                    child: Text('${line.name} x${line.qty}'),
                                   ),
                                   Text(
                                     '₱${line.lineTotal.toStringAsFixed(2)}',
@@ -87,8 +177,7 @@ class _BookingReceiptPaymentScreenState
                           }),
                           const SizedBox(height: 8),
                           Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text('Subtotal:'),
                               Text(
@@ -109,11 +198,9 @@ class _BookingReceiptPaymentScreenState
                           ),
                           ...receipt.basketLines.map((line) {
                             return Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 8),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
                               child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
                                     mainAxisAlignment:
@@ -144,14 +231,14 @@ class _BookingReceiptPaymentScreenState
                                       children: [
                                         if ((line.breakdown['wash'] ?? 0) > 0)
                                           Text(
-                                            'Wash: ₱${(line.breakdown['wash'] ?? 0).toStringAsFixed(2)}',
+                                            'Wash${line.premiumFlags['wash'] ?? false ? ' (Premium)' : ''}: ₱${(line.breakdown['wash'] ?? 0).toStringAsFixed(2)}',
                                             style: const TextStyle(
                                               fontSize: 12,
                                             ),
                                           ),
                                         if ((line.breakdown['dry'] ?? 0) > 0)
                                           Text(
-                                            'Dry: ₱${(line.breakdown['dry'] ?? 0).toStringAsFixed(2)}',
+                                            'Dry${line.premiumFlags['dry'] ?? false ? ' (Premium)' : ''}: ₱${(line.breakdown['dry'] ?? 0).toStringAsFixed(2)}',
                                             style: const TextStyle(
                                               fontSize: 12,
                                             ),
@@ -186,8 +273,7 @@ class _BookingReceiptPaymentScreenState
                           }),
                           const SizedBox(height: 8),
                           Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text('Subtotal:'),
                               Text(
@@ -203,20 +289,16 @@ class _BookingReceiptPaymentScreenState
                         // Fees
                         if (receipt.serviceFee > 0)
                           Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text('Service Fee:'),
-                              Text(
-                                '₱${receipt.serviceFee.toStringAsFixed(2)}',
-                              ),
+                              Text('₱${receipt.serviceFee.toStringAsFixed(2)}'),
                             ],
                           ),
                         if (receipt.handlingFee > 0) ...[
                           const SizedBox(height: 4),
                           Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text('Delivery Fee:'),
                               Text(
@@ -230,13 +312,10 @@ class _BookingReceiptPaymentScreenState
                             receipt.handlingFee > 0) ...[
                           const SizedBox(height: 4),
                           Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text('Tax (12%):'),
-                              Text(
-                                '₱${receipt.tax.toStringAsFixed(2)}',
-                              ),
+                              Text('₱${receipt.tax.toStringAsFixed(2)}'),
                             ],
                           ),
                         ],
@@ -247,8 +326,7 @@ class _BookingReceiptPaymentScreenState
 
                         // Total
                         Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text(
                               'TOTAL:',
@@ -285,10 +363,11 @@ class _BookingReceiptPaymentScreenState
                     children: [
                       Text(
                         'GCash Payment',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onPrimaryContainer,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onPrimaryContainer,
+                            ),
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -327,59 +406,134 @@ class _BookingReceiptPaymentScreenState
                             const SizedBox(height: 12),
                             _buildStepItem(
                               '4',
-                              'Check the box below to confirm',
+                              'Upload the screenshot of the confirmation',
                               colorScheme,
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 16),
-                      CheckboxListTile(
-                        value: _gcashPaymentConfirmed,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            _gcashPaymentConfirmed = value ?? false;
-                          });
+                      // Upload receipt section
+                      Consumer<BookingStateNotifier>(
+                        builder: (context, bookingState, _) {
+                          final hasReceipt =
+                              bookingState.gcashReceiptUrl != null;
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (_uploadError != null)
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red[50],
+                                    border: Border.all(color: Colors.red[300]!),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    _uploadError!,
+                                    style: TextStyle(
+                                      color: Colors.red[700],
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              if (hasReceipt)
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green[50],
+                                    border: Border.all(
+                                      color: Colors.green[300]!,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.check_circle,
+                                        color: Colors.green[700],
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          'Receipt uploaded successfully ✓',
+                                          style: TextStyle(
+                                            color: Colors.green[700],
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ElevatedButton.icon(
+                                onPressed: _isUploading
+                                    ? null
+                                    : () => _pickAndUploadImage(context),
+                                icon: _isUploading
+                                    ? SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor: AlwaysStoppedAnimation(
+                                            colorScheme.onPrimary,
+                                          ),
+                                        ),
+                                      )
+                                    : const Icon(Icons.upload_file),
+                                label: Text(
+                                  _isUploading
+                                      ? 'Uploading...'
+                                      : (hasReceipt
+                                            ? 'Change Receipt'
+                                            : 'Upload Receipt'),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: hasReceipt
+                                      ? Colors.green
+                                      : colorScheme.primary,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
                         },
-                        title: const Text(
-                          'I have completed the GCash payment',
-                          style: TextStyle(fontSize: 12),
-                        ),
-                        contentPadding: EdgeInsets.zero,
-                        controlAffinity:
-                            ListTileControlAffinity.leading,
-                        dense: true,
-                        fillColor: WidgetStatePropertyAll(
-                          colorScheme.onPrimaryContainer,
-                        ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 24),
 
-                // Submit Button
-                ElevatedButton(
-                  onPressed: (_gcashPaymentConfirmed && !_isSubmitting)
-                      ? () => _submitOrder(
-                            context,
-                            bookingState,
-                            authState,
-                            receipt,
-                          )
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                // Info message
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    border: Border.all(color: Colors.blue[300]!),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
+                  child: Row(
+                    children: [
+                      Icon(Icons.info, color: Colors.blue[700], size: 20),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Upload your GCash receipt and review your order. Then click Submit in the flow screen to complete.',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.blue[700],
                           ),
-                        )
-                      : const Text('Submit Order'),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 12),
               ],
@@ -390,11 +544,7 @@ class _BookingReceiptPaymentScreenState
     );
   }
 
-  Widget _buildStepItem(
-    String number,
-    String text,
-    ColorScheme colorScheme,
-  ) {
+  Widget _buildStepItem(String number, String text, ColorScheme colorScheme) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -417,152 +567,8 @@ class _BookingReceiptPaymentScreenState
           ),
         ),
         const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(fontSize: 13),
-          ),
-        ),
+        Expanded(child: Text(text, style: const TextStyle(fontSize: 13))),
       ],
-    );
-  }
-
-  Future<void> _submitOrder(
-    BuildContext context,
-    BookingStateNotifier bookingState,
-    AuthProvider authState,
-    ReceiptSummary receipt,
-  ) async {
-    setState(() {
-      _isSubmitting = true;
-    });
-
-    try {
-      if (authState.currentUser == null) {
-        throw Exception('User not authenticated');
-      }
-
-      final user = authState.currentUser!;
-
-      // Build breakdown and handling using the builder service
-      final breakdown = OrderPayloadBuilder.buildBreakdown(
-        orderProductCounts: bookingState.orderProductCounts,
-        products: bookingState.products,
-        baskets: bookingState.baskets,
-        services: bookingState.services,
-        includeDelivery: bookingState.handling.deliver,
-      );
-
-      final handling = OrderPayloadBuilder.buildHandling(
-        pickupEnabled: bookingState.handling.pickup,
-        pickupAddress: bookingState.handling.pickupAddress,
-        deliveryEnabled: bookingState.handling.deliver,
-        deliveryAddress: bookingState.handling.deliveryAddress,
-        instructions: bookingState.handling.instructions,
-      );
-
-      // Create order payload
-      final orderPayload = CreateOrderPayload(
-        source: 'app',
-        customerId: user.id,
-        breakdown: breakdown,
-        handling: handling,
-        totalAmount: receipt.total,
-        cashierId: null,
-        status: 'pending',
-        orderNote: bookingState.handling.instructions.isNotEmpty
-            ? bookingState.handling.instructions
-            : null,
-      );
-
-      // Create request
-      final request = CreateOrderRequest(
-        customer: CustomerData(
-          id: user.id,
-          phoneNumber: user.phoneNumber,
-          emailAddress: user.emailAddress ?? '',
-        ),
-        orderPayload: orderPayload,
-      );
-
-      // Submit order
-      final orderService = OrderCreationServiceImpl();
-      final response = await orderService.createOrder(request);
-
-      if (!mounted) return;
-
-      if (response.success) {
-        // Reset booking state
-        bookingState.resetForNewOrder();
-
-        // Navigate to success screen
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => OrderSuccessScreen(
-              orderId: response.orderId,
-              totalAmount: receipt.total,
-              customerName: '${user.firstName} ${user.lastName}',
-              customerEmail: user.emailAddress,
-            ),
-          ),
-        );
-      } else {
-        _showErrorDialog(
-          response.error ?? 'Failed to create order',
-          response.insufficientItems,
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        _showErrorDialog(
-          e.toString().replaceAll('Exception: ', ''),
-          null,
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-        });
-      }
-    }
-  }
-
-  void _showErrorDialog(String message, List<Map<String, dynamic>>? insufficientItems) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Order Submission Failed'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(message),
-            if (insufficientItems != null && insufficientItems.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              const Text(
-                'Unavailable Items:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              ...insufficientItems.map((item) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    '${item['productName']} - Requested: ${item['requested']}, Available: ${item['available']}',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                );
-              }),
-            ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
     );
   }
 }
