@@ -559,7 +559,7 @@ class _BookingReceiptPaymentScreenState
                         ),
                         const Divider(),
                         const SizedBox(height: 12),
-                        
+
                         // Pickup
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -598,7 +598,7 @@ class _BookingReceiptPaymentScreenState
                           ],
                         ),
                         const SizedBox(height: 12),
-                        
+
                         // Delivery
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -632,7 +632,10 @@ class _BookingReceiptPaymentScreenState
                                     );
                                   }
                                   return Text(
-                                    bookingState.handling.deliveryAddress.isEmpty
+                                    bookingState
+                                            .handling
+                                            .deliveryAddress
+                                            .isEmpty
                                         ? '(Not specified)'
                                         : bookingState.handling.deliveryAddress,
                                     style: const TextStyle(fontSize: 12),

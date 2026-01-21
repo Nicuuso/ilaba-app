@@ -129,11 +129,12 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
       case BookingPane.basket:
         // At least one basket must have weight > 0 AND have services
         if (state.baskets.isEmpty) return false;
-        
+
         // Check that all baskets with weight have services (no incomplete baskets)
         for (final basket in state.baskets) {
           if (basket.weightKg > 0) {
-            final hasService = basket.washCount > 0 ||
+            final hasService =
+                basket.washCount > 0 ||
                 basket.dryCount > 0 ||
                 basket.spinCount > 0 ||
                 basket.iron ||
@@ -141,7 +142,7 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
             if (!hasService) return false;
           }
         }
-        
+
         // Check that at least one basket has weight and services
         final hasValidBasket = state.baskets.any((basket) {
           if (basket.weightKg <= 0) return false;
@@ -254,19 +255,23 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
                           bool submitDisabled = false;
                           if (_currentPage == _pages.length - 1) {
                             // On receipt page: disable if no receipt uploaded
-                            submitDisabled = bookingState.gcashReceiptUrl == null;
+                            submitDisabled =
+                                bookingState.gcashReceiptUrl == null;
                           }
                           return ElevatedButton(
                             onPressed: _currentPage < _pages.length - 1
                                 ? _canGoNext()
                                       ? _goToNextPage
                                       : null
-                                : (submitDisabled || _isSubmitting ? null : _submitOrder),
+                                : (submitDisabled || _isSubmitting
+                                      ? null
+                                      : _submitOrder),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
                             child:
-                                _isSubmitting && _currentPage == _pages.length - 1
+                                _isSubmitting &&
+                                    _currentPage == _pages.length - 1
                                 ? const SizedBox(
                                     height: 20,
                                     width: 20,
@@ -452,11 +457,15 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
           (p) => p.id == entry.key,
         );
         final subtotal = product.unitPrice * entry.value;
-        debugPrint('📦 Product: id=${product.id}, name="${product.itemName}", price=${product.unitPrice}');
+        debugPrint(
+          '📦 Product: id=${product.id}, name="${product.itemName}", price=${product.unitPrice}',
+        );
         products.add(
           BackendProductPayload(
             productId: product.id,
-            productName: product.itemName.isNotEmpty ? product.itemName : 'Product ${product.id}',
+            productName: product.itemName.isNotEmpty
+                ? product.itemName
+                : 'Product ${product.id}',
             quantity: entry.value,
             unitPrice: product.unitPrice,
             subtotal: subtotal,
