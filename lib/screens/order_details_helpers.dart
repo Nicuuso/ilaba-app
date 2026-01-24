@@ -14,21 +14,22 @@ class OrderDetailsHelpers {
       print('🖼️ Product image: null');
       return '';
     }
-    
+
     final imageStr = imageData.toString().trim();
     if (imageStr.isEmpty) {
       print('🖼️ Product image: empty string');
       return '';
     }
-    
+
     // If it's already a full URL, return it
     if (imageStr.startsWith('http://') || imageStr.startsWith('https://')) {
       print('🖼️ Product image (full URL): $imageStr');
       return imageStr;
     }
-    
+
     // If it's just a filename/path, construct the full URL
-    final fullUrl = '${SupabaseConfig.projectUrl}/storage/v1/object/public/${SupabaseConfig.productBucket}/$imageStr';
+    final fullUrl =
+        '${SupabaseConfig.projectUrl}/storage/v1/object/public/${SupabaseConfig.productBucket}/$imageStr';
     print('🖼️ Product image (constructed): $fullUrl');
     return fullUrl;
   }
@@ -136,19 +137,26 @@ class SafeConversion {
 /// Data extraction helpers
 class OrderDataExtractor {
   /// Extract customer name from customer data
-  static String extractCustomerName(Map<String, dynamic>? customerData, Map<String, dynamic> order) {
+  static String extractCustomerName(
+    Map<String, dynamic>? customerData,
+    Map<String, dynamic> order,
+  ) {
     if (customerData == null) return 'N/A';
-    
-    if (customerData['first_name'] != null && customerData['last_name'] != null) {
+
+    if (customerData['first_name'] != null &&
+        customerData['last_name'] != null) {
       return '${customerData['first_name']} ${customerData['last_name']}';
     }
     return customerData['email_address'] ?? customerData['email'] ?? 'N/A';
   }
 
   /// Extract staff/cashier name
-  static String extractStaffName(Map<String, dynamic>? staffData, Map<String, dynamic> order) {
+  static String extractStaffName(
+    Map<String, dynamic>? staffData,
+    Map<String, dynamic> order,
+  ) {
     if (staffData == null) return 'N/A';
-    
+
     if (staffData['first_name'] != null && staffData['last_name'] != null) {
       return '${staffData['first_name']} ${staffData['last_name']}';
     }
@@ -156,37 +164,43 @@ class OrderDataExtractor {
   }
 
   /// Extract phone number
-  static String extractPhoneNumber(Map<String, dynamic>? customerData, Map<String, dynamic> order) {
+  static String extractPhoneNumber(
+    Map<String, dynamic>? customerData,
+    Map<String, dynamic> order,
+  ) {
     if (customerData == null) return 'N/A';
-    return customerData['phone_number'] ?? 
-        customerData['phone'] ?? 
-        order['customer_phone'] ?? 
+    return customerData['phone_number'] ??
+        customerData['phone'] ??
+        order['customer_phone'] ??
         'N/A';
   }
 
   /// Extract email
-  static String extractEmail(Map<String, dynamic>? customerData, Map<String, dynamic> order) {
+  static String extractEmail(
+    Map<String, dynamic>? customerData,
+    Map<String, dynamic> order,
+  ) {
     if (customerData == null) return 'N/A';
-    return customerData['email_address'] ?? 
-        customerData['email'] ?? 
-        order['customer_email'] ?? 
+    return customerData['email_address'] ??
+        customerData['email'] ??
+        order['customer_email'] ??
         'N/A';
   }
 
   /// Extract pickup address from handling JSONB
   static String extractPickupAddress(Map<String, dynamic> order) {
     final handlingData = order['handling'] as Map<String, dynamic>? ?? {};
-    return (handlingData['pickup'] as Map?)?['address'] ?? 
-        order['pickup_address'] ?? 
-        'N/A';
+    final address = (handlingData['pickup'] as Map?)?['address'] ??
+        order['pickup_address'];
+    return (address == null || address.toString().isEmpty) ? 'In-store' : address.toString();
   }
 
   /// Extract delivery address from handling JSONB
   static String extractDeliveryAddress(Map<String, dynamic> order) {
     final handlingData = order['handling'] as Map<String, dynamic>? ?? {};
-    return (handlingData['delivery'] as Map?)?['address'] ?? 
-        order['delivery_address'] ?? 
-        'N/A';
+    final address = (handlingData['delivery'] as Map?)?['address'] ??
+        order['delivery_address'];
+    return (address == null || address.toString().isEmpty) ? 'In-store' : address.toString();
   }
 
   /// Extract breakdown data
@@ -195,12 +209,17 @@ class OrderDataExtractor {
   }
 
   /// Extract breakdown summary
-  static Map<String, dynamic> extractBreakdownSummary(Map<String, dynamic> breakdown) {
+  static Map<String, dynamic> extractBreakdownSummary(
+    Map<String, dynamic> breakdown,
+  ) {
     return (breakdown['summary'] as Map<String, dynamic>?) ?? {};
   }
 
   /// Get final total (grand_total with VAT, fallback to total_amount)
-  static num getGrandTotal(Map<String, dynamic> order, Map<String, dynamic> summary) {
+  static num getGrandTotal(
+    Map<String, dynamic> order,
+    Map<String, dynamic> summary,
+  ) {
     return (summary['grand_total'] ?? order['total_amount']) ?? 0;
   }
 

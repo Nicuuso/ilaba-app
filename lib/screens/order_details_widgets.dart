@@ -45,6 +45,66 @@ class OrderDetailsWidgets {
     );
   }
 
+  /// Build compact info item with icon only (no label)
+  static Widget buildCompactInfo(
+    String value,
+    IconData icon, {
+    TextStyle? valueStyle,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 18, color: Colors.grey[600]),
+        const SizedBox(height: 4),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style:
+                valueStyle ??
+                const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey,
+                ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Build inline info item with icon and value side-by-side
+  static Widget buildInlineInfo(
+    String value,
+    IconData icon, {
+    TextStyle? valueStyle,
+    bool emphasize = false,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: emphasize ? 16 : 14, color: Colors.grey[600]),
+        const SizedBox(width: 6),
+        Flexible(
+          child: Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style:
+                valueStyle ??
+                TextStyle(
+                  fontSize: emphasize ? 14 : 12,
+                  fontWeight: emphasize ? FontWeight.w700 : FontWeight.w600,
+                  color: Colors.grey[900],
+                ),
+          ),
+        ),
+      ],
+    );
+  }
+
   /// Build metric chip (weight, total, etc.)
   static Widget buildMetricChip(IconData icon, String label, Color color) {
     return Container(
@@ -205,15 +265,21 @@ class OrderDetailsWidgets {
     );
   }
 
-  /// Build order details card (top section)
+  /// Build order details card (top section) - Modernized layout
   static Widget buildOrderDetailsCard(
     BuildContext context,
     Map<String, dynamic> order,
     Map<String, dynamic>? customerData,
     Map<String, dynamic>? staffData,
   ) {
-    final customerName = OrderDataExtractor.extractCustomerName(customerData, order);
-    final customerPhone = OrderDataExtractor.extractPhoneNumber(customerData, order);
+    final customerName = OrderDataExtractor.extractCustomerName(
+      customerData,
+      order,
+    );
+    final customerPhone = OrderDataExtractor.extractPhoneNumber(
+      customerData,
+      order,
+    );
     final customerEmail = OrderDataExtractor.extractEmail(customerData, order);
     final cashierName = OrderDataExtractor.extractStaffName(staffData, order);
     final status = order['status'] ?? 'N/A';
@@ -227,6 +293,7 @@ class OrderDetailsWidgets {
     final summary = OrderDataExtractor.extractBreakdownSummary(breakdown);
     final finalTotal = OrderDataExtractor.getGrandTotal(order, summary);
     final totalAmount = OrderDetailsHelpers.formatCurrency(finalTotal);
+    final statusColor = OrderDetailsHelpers.getStatusColor(status);
 
     return Container(
       width: double.infinity,
@@ -242,10 +309,11 @@ class OrderDetailsWidgets {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 🏆 Top Row: Customer Name + Status Badge + Total
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,39 +322,118 @@ class OrderDetailsWidgets {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    buildDetailRow(context, 'Customer', customerName, Icons.person_outline),
-                    const SizedBox(height: 8),
-                    buildDetailRow(context, 'Phone', customerPhone, Icons.phone_outlined),
-                    const SizedBox(height: 8),
-                    buildDetailRow(context, 'Email', customerEmail, Icons.email_outlined),
+                    Text(
+                      customerName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 18,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    buildInlineInfo(
+                      customerPhone,
+                      Icons.phone_outlined,
+                      valueStyle: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[700],
+                      ),
+                    ),
                   ],
                 ),
               ),
               const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: OrderDetailsHelpers.getStatusColor(status),
-                        borderRadius: BorderRadius.circular(7),
-                      ),
-                      child: Text(
-                        status.toUpperCase(),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 11,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      status.toUpperCase(),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        fontSize: 11,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      totalAmount,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: OrderDetailsHelpers.getStatusColor(status),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    totalAmount,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: statusColor,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Container(height: 0.8, color: Colors.grey[200]),
+          const SizedBox(height: 14),
+
+          // 📋 Two-Column Layout: Contact Info + Order Meta
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Left Column: Contact info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    buildInlineInfo(
+                      customerEmail,
+                      Icons.email_outlined,
+                      valueStyle: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    buildInlineInfo(
+                      cashierName,
+                      Icons.person_pin_outlined,
+                      valueStyle: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[900],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+
+              // Right Column: ID & Timestamp
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    buildInlineInfo(
+                      orderId,
+                      Icons.receipt_outlined,
+                      valueStyle: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[700],
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    buildInlineInfo(
+                      createdAt,
+                      Icons.calendar_today_outlined,
+                      valueStyle: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[700],
                       ),
                     ),
                   ],
@@ -294,24 +441,36 @@ class OrderDetailsWidgets {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Container(height: 0.8, color: Colors.grey[200]),
-          const SizedBox(height: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 14),
+
+          // 📍 Fulfillment: Pickup & Delivery in grid
+          Row(
             children: [
-              buildDetailRow(context, 'Cashier', cashierName, Icons.person_pin_outlined),
-              const SizedBox(height: 8),
-              buildDetailRow(context, 'Order ID', orderId, Icons.receipt_outlined),
-              const SizedBox(height: 8),
-              buildDetailRow(context, 'Created', createdAt, Icons.calendar_today_outlined),
-              const SizedBox(height: 12),
-              if (pickupAddress != 'N/A') ...[
-                buildDetailRow(context, 'Pickup', pickupAddress, Icons.location_on_outlined),
-                const SizedBox(height: 8),
-              ],
-              if (deliveryAddress != 'N/A')
-                buildDetailRow(context, 'Delivery', deliveryAddress, Icons.local_shipping_outlined),
+              Expanded(
+                child: buildInlineInfo(
+                  pickupAddress,
+                  Icons.location_on_outlined,
+                  valueStyle: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[900],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: buildInlineInfo(
+                  deliveryAddress,
+                  Icons.local_shipping_outlined,
+                  valueStyle: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[900],
+                  ),
+                ),
+              ),
             ],
           ),
         ],
@@ -330,9 +489,9 @@ class OrderDetailsWidgets {
           const SizedBox(height: 16),
           Text(
             message,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Colors.grey[600],
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
         ],

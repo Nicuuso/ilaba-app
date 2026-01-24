@@ -42,10 +42,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       print('🔍 Fetching customer from customers table...');
       final customerData = widget.order['customer_id'] != null
           ? await supabase
-              .from('customers')
-              .select()
-              .eq('id', widget.order['customer_id'])
-              .single()
+                .from('customers')
+                .select()
+                .eq('id', widget.order['customer_id'])
+                .single()
           : null;
       print('✅ Customer data: $customerData');
 
@@ -53,15 +53,16 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       print('🔍 Fetching staff from staff table...');
       final staffData = widget.order['staff_id'] != null
           ? await supabase
-              .from('staff')
-              .select()
-              .eq('id', widget.order['staff_id'])
-              .single()
+                .from('staff')
+                .select()
+                .eq('id', widget.order['staff_id'])
+                .single()
           : null;
       print('✅ Staff data: $staffData');
 
       // Extract product IDs from breakdown items
-      final breakdown = widget.order['breakdown'] as Map<String, dynamic>? ?? {};
+      final breakdown =
+          widget.order['breakdown'] as Map<String, dynamic>? ?? {};
       final items = (breakdown['items'] as List?) ?? [];
       final productIds = <String>[];
       for (final item in items) {
@@ -74,7 +75,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       // Fetch product details with images
       Map<String, dynamic> productsMap = {};
       if (productIds.isNotEmpty) {
-        print('🔍 Fetching ${productIds.length} products from products table...');
+        print(
+          '🔍 Fetching ${productIds.length} products from products table...',
+        );
         final products = await supabase
             .from('products')
             .select()
@@ -112,35 +115,33 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
-            appBar: AppBar(
-              title: const Text('Order Details'),
-              elevation: 0,
-            ),
-            body: const Center(
-              child: CircularProgressIndicator(),
-            ),
+            appBar: AppBar(title: const Text('Order Details'), elevation: 0),
+            body: const Center(child: CircularProgressIndicator()),
           );
         }
 
         if (snapshot.hasError) {
           return Scaffold(
-            appBar: AppBar(
-              title: const Text('Order Details'),
-              elevation: 0,
-            ),
-            body: Center(
-              child: Text('Error loading order: ${snapshot.error}'),
-            ),
+            appBar: AppBar(title: const Text('Order Details'), elevation: 0),
+            body: Center(child: Text('Error loading order: ${snapshot.error}')),
           );
         }
 
         final orderData = snapshot.data ?? {};
         final order = orderData['order'] as Map<String, dynamic>;
-        final customerData = orderData['customer'] as Map<String, dynamic>? ?? {};
+        final customerData =
+            orderData['customer'] as Map<String, dynamic>? ?? {};
         final staffData = orderData['staff'] as Map<String, dynamic>? ?? {};
-        final productsMap = orderData['products'] as Map<String, dynamic>? ?? {};
+        final productsMap =
+            orderData['products'] as Map<String, dynamic>? ?? {};
 
-        return _buildOrderScreen(context, order, customerData, staffData, productsMap);
+        return _buildOrderScreen(
+          context,
+          order,
+          customerData,
+          staffData,
+          productsMap,
+        );
       },
     );
   }
@@ -179,7 +180,12 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 📋 Order Details Card
-              OrderDetailsWidgets.buildOrderDetailsCard(context, order, customerData.isEmpty ? null : customerData, staffData.isEmpty ? null : staffData),
+              OrderDetailsWidgets.buildOrderDetailsCard(
+                context,
+                order,
+                customerData.isEmpty ? null : customerData,
+                staffData.isEmpty ? null : staffData,
+              ),
               const SizedBox(height: 20),
 
               // 🧺 Laundry Baskets Section
@@ -238,43 +244,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 const SizedBox(height: 20),
               ],
 
-              // 📍 Fulfillment Section
-              if (pickupAddress != 'N/A' || deliveryAddress != 'N/A') ...[
-                OrderDetailsWidgets.buildSectionHeader(
-                  context,
-                  Icons.local_shipping_outlined,
-                  'Fulfillment',
-                  '',
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (pickupAddress != 'N/A')
-                      Expanded(
-                        child: OrderDetailsWidgets.buildAddressCard(
-                          context,
-                          'Pickup',
-                          pickupAddress,
-                          Colors.blue,
-                        ),
-                      ),
-                    if (pickupAddress != 'N/A' && deliveryAddress != 'N/A')
-                      const SizedBox(width: 10),
-                    if (deliveryAddress != 'N/A')
-                      Expanded(
-                        child: OrderDetailsWidgets.buildAddressCard(
-                          context,
-                          'Delivery',
-                          deliveryAddress,
-                          Colors.purple,
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-              ],
-
               // ⛔ Cancellation Section
               if (cancellation != null) ...[
                 _buildCancellationCard(context, cancellation),
@@ -301,10 +270,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 
   /// Build basket cards
-  List<Widget> _buildBasketCards(
-    BuildContext context,
-    List<dynamic> baskets,
-  ) {
+  List<Widget> _buildBasketCards(BuildContext context, List<dynamic> baskets) {
     return baskets.asMap().entries.map((entry) {
       final basket = entry.value as Map<String, dynamic>;
       final services = (basket['services'] as List?) ?? [];
@@ -333,7 +299,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: OrderDetailsHelpers.getStatusColor(
                         basket['status'],
@@ -345,7 +314,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
-                        color: OrderDetailsHelpers.getStatusColor(basket['status']),
+                        color: OrderDetailsHelpers.getStatusColor(
+                          basket['status'],
+                        ),
                       ),
                     ),
                   ),
@@ -396,6 +367,17 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   ) {
     return services.map((service) {
       final svc = service as Map<String, dynamic>;
+      print('🔧 Service data: $svc');
+      print('🔧 Service keys: ${svc.keys.toList()}');
+      
+      // Try multiple field names for service name
+      String serviceName = svc['service_type'] ?? 
+                          svc['service_name'] ?? 
+                          svc['name'] ?? 
+                          svc['type'] ?? 
+                          'Service';
+      print('🔧 Service name extracted: $serviceName');
+      
       final subtotal = SafeConversion.toNum(svc['subtotal']);
 
       return Padding(
@@ -415,7 +397,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      OrderDetailsHelpers.formatLabel(svc['service_type'] ?? 'Service'),
+                      OrderDetailsHelpers.formatLabel(serviceName),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
@@ -451,7 +433,11 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 
   /// Build products grid - compact horizontal list with square thumbnails
-  Widget _buildProductsGrid(BuildContext context, List<dynamic> items, Map<String, dynamic> productsMap) {
+  Widget _buildProductsGrid(
+    BuildContext context,
+    List<dynamic> items,
+    Map<String, dynamic> productsMap,
+  ) {
     print('📦 Building products grid with ${items.length} items');
     print('📦 Products map contains: ${productsMap.keys.toList()}');
     return Column(
@@ -459,23 +445,27 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       children: items.asMap().entries.map((entry) {
         final index = entry.key;
         final item = entry.value as Map<String, dynamic>;
-        
+
         print('\n📦 Product #${index + 1}:');
         print('  Item Keys: ${item.keys.toList()}');
         final productId = item['product_id']?.toString();
         print('  Product ID: $productId');
-        
+
         // Lookup product details from productsMap
-        final productDetails = productId != null ? productsMap[productId] : null;
+        final productDetails = productId != null
+            ? productsMap[productId]
+            : null;
         print('  Product details found: ${productDetails != null}');
-        
-        final imageUrl = OrderDetailsHelpers.getProductImageUrl(productDetails?['image_url']);
+
+        final imageUrl = OrderDetailsHelpers.getProductImageUrl(
+          productDetails?['image_url'],
+        );
         final name = item['product_name'] ?? 'Unknown Product';
         final quantity = SafeConversion.toInt(item['quantity']);
         final unitPrice = SafeConversion.toNum(item['unit_price']);
         final subtotal = SafeConversion.toNum(item['subtotal']);
         final discount = SafeConversion.toNum(item['discount']);
-        
+
         print('  Final image URL: $imageUrl');
         print('  Name: $name, Qty: $quantity, Price: $unitPrice');
 
@@ -519,9 +509,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                             }
                             return Center(
                               child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes != null
+                                value:
+                                    loadingProgress.expectedTotalBytes != null
                                     ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
+                                          loadingProgress.expectedTotalBytes!
                                     : null,
                                 strokeWidth: 2,
                               ),
@@ -538,7 +529,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               // Product info
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -569,9 +563,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                               'Qty: $quantity',
                               style: Theme.of(context).textTheme.labelSmall
                                   ?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 11,
-                              ),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 11,
+                                  ),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -579,9 +573,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                             '@ ${OrderDetailsHelpers.formatCurrency(unitPrice)}',
                             style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
-                              fontSize: 11,
-                              color: Colors.grey[600],
-                            ),
+                                  fontSize: 11,
+                                  color: Colors.grey[600],
+                                ),
                           ),
                         ],
                       ),
@@ -597,18 +591,18 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                 'Subtotal',
                                 style: Theme.of(context).textTheme.labelSmall
                                     ?.copyWith(
-                                  fontSize: 10,
-                                  color: Colors.grey[600],
-                                ),
+                                      fontSize: 10,
+                                      color: Colors.grey[600],
+                                    ),
                               ),
                               Text(
                                 OrderDetailsHelpers.formatCurrency(subtotal),
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 12,
-                                  color: Colors.grey[900],
-                                ),
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 12,
+                                      color: Colors.grey[900],
+                                    ),
                               ),
                             ],
                           ),
@@ -626,10 +620,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                 '-${OrderDetailsHelpers.formatCurrency(discount)}',
                                 style: Theme.of(context).textTheme.labelSmall
                                     ?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 11,
-                                  color: Colors.red[700],
-                                ),
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 11,
+                                      color: Colors.red[700],
+                                    ),
                               ),
                             ),
                         ],
@@ -771,7 +765,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 
   /// Build discount cards
-  List<Widget> _buildDiscountCards(BuildContext context, List<dynamic> discounts) {
+  List<Widget> _buildDiscountCards(
+    BuildContext context,
+    List<dynamic> discounts,
+  ) {
     return discounts.map((discount) {
       final d = discount as Map<String, dynamic>;
       return Container(
@@ -823,10 +820,18 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     }).toList();
   }
 
-  /// Build summary card
+  /// Build summary card - Modernized layout with two-column grid
   Widget _buildSummaryCard(BuildContext context, Map<String, dynamic> summary) {
+    final subtotalProducts = summary['subtotal_products'] ?? 0;
+    final subtotalServices = summary['subtotal_services'] ?? 0;
+    final handling = summary['handling'] ?? 0;
+    final serviceFee = summary['service_fee'] ?? 0;
+    final discounts = summary['discounts'] ?? 0;
+    final vatAmount = summary['vat_amount'] ?? 0;
+    final grandTotal = summary['grand_total'] ?? 0;
+
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(11),
@@ -842,107 +847,164 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if ((summary['subtotal_products'] ?? 0) > 0)
-            OrderDetailsWidgets.buildSummaryRow(
-              context,
-              'Products',
-              OrderDetailsHelpers.formatCurrency(summary['subtotal_products']),
-              isHighlight: false,
+          // 🧮 Line items in two-column grid
+          if (subtotalProducts > 0 || subtotalServices > 0 || handling > 0 || serviceFee > 0)
+            Wrap(
+              runSpacing: 10,
+              spacing: 16,
+              children: [
+                if (subtotalProducts > 0)
+                  Expanded(
+                    child: OrderDetailsWidgets.buildSummaryRow(
+                      context,
+                      'Products',
+                      OrderDetailsHelpers.formatCurrency(subtotalProducts),
+                      isHighlight: false,
+                    ),
+                    flex: 1,
+                  ),
+                if (subtotalServices > 0)
+                  Expanded(
+                    child: OrderDetailsWidgets.buildSummaryRow(
+                      context,
+                      'Services',
+                      OrderDetailsHelpers.formatCurrency(subtotalServices),
+                      isHighlight: false,
+                    ),
+                    flex: 1,
+                  ),
+                if (handling > 0)
+                  Expanded(
+                    child: OrderDetailsWidgets.buildSummaryRow(
+                      context,
+                      'Handling',
+                      OrderDetailsHelpers.formatCurrency(handling),
+                      isHighlight: false,
+                    ),
+                    flex: 1,
+                  ),
+                if (serviceFee > 0)
+                  Expanded(
+                    child: OrderDetailsWidgets.buildSummaryRow(
+                      context,
+                      'Service Fee',
+                      OrderDetailsHelpers.formatCurrency(serviceFee),
+                      isHighlight: false,
+                    ),
+                    flex: 1,
+                  ),
+              ],
             ),
-          if ((summary['subtotal_services'] ?? 0) > 0)
-            OrderDetailsWidgets.buildSummaryRow(
-              context,
-              'Services',
-              OrderDetailsHelpers.formatCurrency(summary['subtotal_services']),
-              isHighlight: false,
+          if (subtotalProducts > 0 || subtotalServices > 0 || handling > 0 || serviceFee > 0)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Container(height: 0.8, color: Colors.grey[200]),
             ),
-          if ((summary['handling'] ?? 0) > 0)
-            OrderDetailsWidgets.buildSummaryRow(
-              context,
-              'Handling',
-              OrderDetailsHelpers.formatCurrency(summary['handling']),
-              isHighlight: false,
-            ),
-          if ((summary['service_fee'] ?? 0) > 0)
-            OrderDetailsWidgets.buildSummaryRow(
-              context,
-              'Service Fee',
-              OrderDetailsHelpers.formatCurrency(summary['service_fee']),
-              isHighlight: false,
-            ),
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 10),
-            height: 0.8,
-            color: Colors.grey[200],
-          ),
+
+          // 💰 Subtotal & Adjustments
           OrderDetailsWidgets.buildSummaryRow(
             context,
             'Subtotal',
-            OrderDetailsHelpers.formatCurrency(
-              (summary['subtotal_products'] ?? 0) +
-                  (summary['subtotal_services'] ?? 0),
-            ),
+            OrderDetailsHelpers.formatCurrency(subtotalProducts + subtotalServices),
             isHighlight: true,
           ),
-          if ((summary['discounts'] ?? 0) > 0)
+          if (discounts > 0) ...[
+            const SizedBox(height: 8),
             OrderDetailsWidgets.buildSummaryRow(
               context,
               'Discounts',
-              '-${OrderDetailsHelpers.formatCurrency(summary['discounts'])}',
+              '-${OrderDetailsHelpers.formatCurrency(discounts)}',
               isHighlight: true,
               isNegative: true,
             ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(7),
-              border: Border.all(color: Colors.grey[200]!, width: 0.5),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'VAT (12% incl.)',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
+          ],
+          const SizedBox(height: 12),
+
+          // 🧮 VAT & Total in row
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(7),
+                    border: Border.all(color: Colors.grey[200]!, width: 0.5),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'VAT (12%)',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        OrderDetailsHelpers.formatCurrency(vatAmount),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: Colors.grey[900],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  OrderDetailsHelpers.formatCurrency(summary['vat_amount']),
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.green[50],
+                    borderRadius: BorderRadius.circular(7),
+                    border: Border.all(color: Colors.green[200]!, width: 1.2),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'TOTAL',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                          color: Colors.green[900],
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        OrderDetailsHelpers.formatCurrency(grandTotal),
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: Colors.green[700],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 10),
-            height: 0.8,
-            color: Colors.grey[200],
-          ),
-          OrderDetailsWidgets.buildSummaryRow(
-            context,
-            'TOTAL',
-            OrderDetailsHelpers.formatCurrency(
-              summary['grand_total'] ?? 0,
-            ),
-            isHighlight: true,
-            isTotal: true,
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  /// Build payment card
+  /// Build payment card - Modernized layout
   Widget _buildPaymentCard(BuildContext context, Map<String, dynamic> payment) {
+    final method = (payment['method'] ?? 'Unknown').toString();
+    final amountPaid = payment['amount_paid'] ?? 0;
+    final change = payment['change'] ?? 0;
+    final paymentStatus = payment['payment_status'] ?? 'N/A';
+    final referenceNumber = payment['reference_number'];
+
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(11),
@@ -958,26 +1020,36 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 💳 Method Badge + Status
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Method',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.green[700],
+                  borderRadius: BorderRadius.circular(7),
+                ),
+                child: Text(
+                  OrderDetailsHelpers.formatLabel(method),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.green[700],
+                  color: OrderDetailsHelpers.getStatusColor(paymentStatus),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  OrderDetailsHelpers.formatLabel(
-                    (payment['method'] ?? 'Unknown').toString(),
-                  ),
+                  OrderDetailsHelpers.formatLabel(paymentStatus),
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -987,96 +1059,109 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          OrderDetailsWidgets.buildSummaryRow(
-            context,
-            'Paid Amount',
-            OrderDetailsHelpers.formatCurrency(payment['amount_paid']),
-          ),
-          if ((payment['change'] ?? 0) > 0)
-            OrderDetailsWidgets.buildSummaryRow(
-              context,
-              'Change',
-              OrderDetailsHelpers.formatCurrency(payment['change']),
-              isNegative: true,
-            ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(7),
-              border: Border.all(color: Colors.grey[200]!, width: 0.5),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Status',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
+          const SizedBox(height: 14),
+          Container(height: 0.8, color: Colors.grey[200]),
+          const SizedBox(height: 14),
+
+          // 💰 Amount & Change in two-column
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue[100]!, width: 0.8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Paid',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blue[700],
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        OrderDetailsHelpers.formatCurrency(amountPaid),
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.blue[900],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: OrderDetailsHelpers.getStatusColor(
-                      payment['payment_status'],
+              ),
+              if (change > 0) ...[
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.amber[50],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.amber[100]!, width: 0.8),
                     ),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    OrderDetailsHelpers.formatLabel(
-                      (payment['payment_status'] ?? 'N/A').toString(),
-                    ),
-                    style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Change',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.amber[700],
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          OrderDetailsHelpers.formatCurrency(change),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.amber[900],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ],
-            ),
+            ],
           ),
-          if (payment['reference_number'] != null) ...[
-            const SizedBox(height: 8),
+          if (referenceNumber != null) ...[
+            const SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(7),
+                borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.grey[300]!, width: 0.5),
               ),
               child: Row(
                 children: [
                   Icon(
-                    Icons.receipt_outlined,
-                    size: 15,
+                    Icons.qr_code_2_outlined,
+                    size: 16,
                     color: Colors.grey[600],
                   ),
-                  const SizedBox(width: 7),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Reference',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            fontSize: 10,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        Text(
-                          payment['reference_number'].toString(),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                    child: Text(
+                      referenceNumber.toString(),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[800],
+                        fontFamily: 'monospace',
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
@@ -1105,11 +1190,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.cancel_outlined,
-                color: Colors.red[700],
-                size: 18,
-              ),
+              Icon(Icons.cancel_outlined, color: Colors.red[700], size: 18),
               const SizedBox(width: 7),
               Text(
                 'Order Cancelled',
@@ -1133,9 +1214,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             const SizedBox(height: 5),
             Text(
               'Notes: ${cancellation['notes']}',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontSize: 12,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(fontSize: 12),
             ),
           ],
         ],
@@ -1211,9 +1292,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     const SizedBox(height: 2),
                     Text(
                       'By: ${l['changed_by']}',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontSize: 11,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.labelSmall?.copyWith(fontSize: 11),
                     ),
                   ],
                 ],
