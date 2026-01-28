@@ -4,6 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:ilaba/providers/auth_provider.dart';
 import 'package:ilaba/providers/mobile_booking_provider.dart';
+import 'package:ilaba/providers/settings_provider.dart';
+import 'package:ilaba/providers/notifications_provider.dart';
 import 'package:ilaba/services/auth_service.dart';
 import 'package:ilaba/services/api_client.dart';
 import 'package:ilaba/services/services_repository.dart';
@@ -79,6 +81,10 @@ class MyApp extends StatelessWidget {
           create: (context) =>
               LoyaltyService(authService: context.read<AuthService>()),
         ),
+        // Settings Provider
+        ChangeNotifierProvider<SettingsProvider>(
+          create: (_) => SettingsProvider(),
+        ),
         // Mobile Booking Provider
         ChangeNotifierProvider<MobileBookingProvider>(
           create: (context) => MobileBookingProvider(
@@ -89,43 +95,48 @@ class MyApp extends StatelessWidget {
             loyaltyService: context.read<LoyaltyService>(),
           ),
         ),
+        // Notifications Provider
+        ChangeNotifierProvider<NotificationsProvider>(
+          create: (_) => NotificationsProvider(),
+        ),
       ],
-      child: MaterialApp(
-        title: 'iLaba',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-          useMaterial3: true,
-        ),
-        home: Consumer<AuthProvider>(
-          builder: (context, authProvider, _) {
-            // Show loading while checking auth state
-            if (authProvider.isLoading) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            }
+      child: Consumer<SettingsProvider>(
+        builder: (context, settingsProvider, _) {
+          return MaterialApp(
+            title: 'iLaba',
+            theme: settingsProvider.getCustomTheme(),
+            home: Consumer<AuthProvider>(
+              builder: (context, authProvider, _) {
+                // Show loading while checking auth state
+                if (authProvider.isLoading) {
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
 
-            // Route based on login state
-            return authProvider.isLoggedIn
-                ? const HomeMenuScreen()
-                : const LoginScreen();
-          },
-        ),
-        onGenerateRoute: (settings) {
-          switch (settings.name) {
-            case '/home':
-              return MaterialPageRoute(
-                builder: (context) => const HomeMenuScreen(),
-              );
-            case '/login':
-              return MaterialPageRoute(
-                builder: (context) => const LoginScreen(),
-              );
-            default:
-              return null;
-          }
+                // Route based on login state
+                return authProvider.isLoggedIn
+                    ? const HomeMenuScreen()
+                    : const LoginScreen();
+              },
+            ),
+            onGenerateRoute: (settings) {
+              switch (settings.name) {
+                case '/home':
+                  return MaterialPageRoute(
+                    builder: (context) => const HomeMenuScreen(),
+                  );
+                case '/login':
+                  return MaterialPageRoute(
+                    builder: (context) => const LoginScreen(),
+                  );
+                default:
+                  return null;
+              }
+            },
+            debugShowCheckedModeBanner: false,
+          );
         },
-        debugShowCheckedModeBanner: false,
       ),
     );
   }

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ilaba/models/order_models.dart';
 import 'package:ilaba/providers/mobile_booking_provider.dart';
+import 'package:ilaba/constants/ilaba_colors.dart';
 
 class MobileBookingBasketsStep extends StatelessWidget {
   const MobileBookingBasketsStep({Key? key}) : super(key: key);
@@ -69,7 +70,7 @@ class MobileBookingBasketsStep extends StatelessWidget {
         final basket = provider.activeBasket;
 
         return Container(
-          color: Colors.white,
+          color: ILabaColors.white,
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -90,9 +91,9 @@ class MobileBookingBasketsStep extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Color(0xffC41D7F).withOpacity(0.1), Color(0xffC41D7F).withOpacity(0.05)],
+                          colors: [ILabaColors.burgundy.withOpacity(0.1), ILabaColors.burgundy.withOpacity(0.05)],
                         ),
-                        border: Border.all(color: Color(0xffC41D7F).withOpacity(0.3)),
+                        border: Border.all(color: ILabaColors.burgundy.withOpacity(0.3)),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: const Text(
@@ -100,7 +101,7 @@ class MobileBookingBasketsStep extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 18,
-                          color: Color(0xffC41D7F),
+                          color: ILabaColors.burgundy,
                         ),
                       ),
                     ),
@@ -129,10 +130,9 @@ class MobileBookingBasketsStep extends StatelessWidget {
 
                     // Iron
                     _buildIronSection(context, provider, basket),
-                    const SizedBox(height: 16),
-
-                    // Plastic Bags
-                    _buildPlasticBagsSection(context, provider),
+                    // HIDDEN: Plastic Bags option
+                    // const SizedBox(height: 16),
+                    // _buildPlasticBagsSection(context, provider),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -164,7 +164,7 @@ class MobileBookingBasketsStep extends StatelessWidget {
       children: [
         const Text(
           '🧺 Wash',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFFC41D7F)),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: ILabaColors.burgundy),
         ),
         const SizedBox(height: 10),
         GridView.count(
@@ -226,12 +226,12 @@ class MobileBookingBasketsStep extends StatelessWidget {
                   end: Alignment.bottomRight,
                 )
               : LinearGradient(
-                  colors: [Colors.white, Colors.grey.shade50],
+                  colors: [ILabaColors.white, ILabaColors.lightGray],
                 ),
           border: Border.all(
             color: services.spin
                 ? const Color(0xFF0EA5E9).withOpacity(0.2)
-                : Colors.grey.shade300,
+                : ILabaColors.lightGray,
             width: services.spin ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(6),
@@ -270,7 +270,7 @@ class MobileBookingBasketsStep extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: services.spin ? Colors.white : Colors.grey.shade900,
+                        color: services.spin ? ILabaColors.white : ILabaColors.darkText,
                       ),
                     ),
                     if ((spinInfo['description'] as String).isNotEmpty)
@@ -279,8 +279,8 @@ class MobileBookingBasketsStep extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           color: services.spin
-                              ? Colors.white.withOpacity(0.8)
-                              : Colors.grey.shade600,
+                              ? ILabaColors.white.withOpacity(0.8)
+                              : ILabaColors.lightText,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -300,8 +300,8 @@ class MobileBookingBasketsStep extends StatelessWidget {
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: services.spin
-                          ? Colors.white.withOpacity(0.95)
-                          : const Color(0xffC41D7F),
+                          ? ILabaColors.white.withOpacity(0.95)
+                          : ILabaColors.burgundy,
                     ),
                   ),
                 SizedBox(
@@ -311,7 +311,7 @@ class MobileBookingBasketsStep extends StatelessWidget {
                     value: services.spin,
                     onChanged: (value) =>
                         provider.updateBasketService('spin', value ?? false),
-                    activeColor: const Color(0xFFC41D7F),
+                    activeColor: ILabaColors.burgundy,
                   ),
                 ),
               ],
@@ -338,7 +338,7 @@ class MobileBookingBasketsStep extends StatelessWidget {
       children: [
         const Text(
           '💨 Dry',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFFC41D7F)),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: ILabaColors.burgundy),
         ),
         const SizedBox(height: 10),
         GridView.count(
@@ -401,12 +401,12 @@ class MobileBookingBasketsStep extends StatelessWidget {
           children: [
             const Text(
               '⏱️ Additional Dry',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFFC41D7F)),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: ILabaColors.burgundy),
             ),
             const SizedBox(width: 8),
             Text(
               '@ ₱${pricePerIncrement.toStringAsFixed(0)}/${minutesPerIncrement}min',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400, color: ILabaColors.lightText),
             ),
           ],
         ),
@@ -415,13 +415,13 @@ class MobileBookingBasketsStep extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [const Color(0xFFC41D7F).withOpacity(0.1), const Color(0xFFC41D7F).withOpacity(0.05)],
+              colors: [ILabaColors.burgundy.withOpacity(0.1), ILabaColors.burgundy.withOpacity(0.05)],
             ),
-            border: Border.all(color: const Color(0xFFC41D7F).withOpacity(0.3)),
+            border: Border.all(color: ILabaColors.burgundy.withOpacity(0.3)),
             borderRadius: BorderRadius.circular(6),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFC41D7F).withOpacity(0.08),
+                color: ILabaColors.burgundy.withOpacity(0.08),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -435,7 +435,7 @@ class MobileBookingBasketsStep extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
-                  color: Colors.grey.shade800,
+                  color: ILabaColors.darkText,
                 ),
               ),
               // Subtotal in the middle
@@ -445,7 +445,7 @@ class MobileBookingBasketsStep extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xffC41D7F),
+                    color: ILabaColors.burgundy,
                   ),
                 ),
               // Horizontal buttons
@@ -454,19 +454,19 @@ class MobileBookingBasketsStep extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [const Color(0xFFC41D7F), const Color(0xFFA01560)],
+                        colors: [ILabaColors.burgundy, ILabaColors.burgundyDark],
                       ),
                       borderRadius: BorderRadius.circular(6),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFC41D7F).withOpacity(0.3),
+                          color: ILabaColors.burgundy.withOpacity(0.3),
                           blurRadius: 4,
                           offset: const Offset(0, 1),
                         ),
                       ],
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.remove, color: Colors.white),
+                      icon: const Icon(Icons.remove, color: ILabaColors.white),
                       onPressed: currentMinutes > 0
                           ? () {
                               final newVal =
@@ -489,19 +489,19 @@ class MobileBookingBasketsStep extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [const Color(0xFFC41D7F), const Color(0xFFA01560)],
+                        colors: [ILabaColors.burgundy, ILabaColors.burgundyDark],
                       ),
                       borderRadius: BorderRadius.circular(6),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFC41D7F).withOpacity(0.3),
+                          color: ILabaColors.burgundy.withOpacity(0.3),
                           blurRadius: 4,
                           offset: const Offset(0, 1),
                         ),
                       ],
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.add, color: Colors.white),
+                      icon: const Icon(Icons.add, color: ILabaColors.white),
                       onPressed: currentMinutes < 24
                           ? () {
                               final newVal = currentMinutes + minutesPerIncrement;
@@ -548,12 +548,12 @@ class MobileBookingBasketsStep extends StatelessWidget {
           children: [
             const Text(
               '👔 Iron',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFFC41D7F)),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: ILabaColors.burgundy),
             ),
             const SizedBox(width: 8),
             Text(
               '@ ₱${ironPrice.toStringAsFixed(0)}/kg',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400, color: ILabaColors.lightText),
             ),
           ],
         ),
@@ -562,13 +562,13 @@ class MobileBookingBasketsStep extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [const Color(0xFFC41D7F).withOpacity(0.1), const Color(0xFFC41D7F).withOpacity(0.05)],
+              colors: [ILabaColors.burgundy.withOpacity(0.1), ILabaColors.burgundy.withOpacity(0.05)],
             ),
-            border: Border.all(color: const Color(0xFFC41D7F).withOpacity(0.3)),
+            border: Border.all(color: ILabaColors.burgundy.withOpacity(0.3)),
             borderRadius: BorderRadius.circular(6),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFC41D7F).withOpacity(0.08),
+                color: ILabaColors.burgundy.withOpacity(0.08),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -582,7 +582,7 @@ class MobileBookingBasketsStep extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
-                  color: Colors.grey.shade800,
+                  color: ILabaColors.darkText,
                 ),
               ),
               // Subtotal in the middle
@@ -592,7 +592,7 @@ class MobileBookingBasketsStep extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xffC41D7F),
+                    color: ILabaColors.burgundy,
                   ),
                 ),
               // Horizontal buttons
@@ -601,19 +601,19 @@ class MobileBookingBasketsStep extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [const Color(0xFFC41D7F), const Color(0xFFA01560)],
+                        colors: [ILabaColors.burgundy, ILabaColors.burgundyDark],
                       ),
                       borderRadius: BorderRadius.circular(6),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFC41D7F).withOpacity(0.3),
+                          color: ILabaColors.burgundy.withOpacity(0.3),
                           blurRadius: 4,
                           offset: const Offset(0, 1),
                         ),
                       ],
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.remove, color: Colors.white),
+                      icon: const Icon(Icons.remove, color: ILabaColors.white),
                       onPressed: currentWeight > 0
                           ? () {
                               final newVal = currentWeight == 2 ? 0 : (currentWeight - 1).clamp(0, 8);
@@ -633,19 +633,19 @@ class MobileBookingBasketsStep extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [const Color(0xFFC41D7F), const Color(0xFFA01560)],
+                        colors: [ILabaColors.burgundy, ILabaColors.burgundyDark],
                       ),
                       borderRadius: BorderRadius.circular(6),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFC41D7F).withOpacity(0.3),
+                          color: ILabaColors.burgundy.withOpacity(0.3),
                           blurRadius: 4,
                           offset: const Offset(0, 1),
                         ),
                       ],
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.add, color: Colors.white),
+                      icon: const Icon(Icons.add, color: ILabaColors.white),
                       onPressed: currentWeight < 8
                           ? () {
                               final newVal = currentWeight == 0 ? 2 : (currentWeight + 1).clamp(0, 8);
@@ -686,12 +686,12 @@ class MobileBookingBasketsStep extends StatelessWidget {
           children: [
             const Text(
               '🛍️ Plastic Bags',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFFC41D7F)),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: ILabaColors.burgundy),
             ),
             const SizedBox(width: 8),
             Text(
               '@ ₱${bagPrice.toStringAsFixed(2)}/pc',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400, color: ILabaColors.lightText),
             ),
           ],
         ),
@@ -700,13 +700,13 @@ class MobileBookingBasketsStep extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [const Color(0xFFC41D7F).withOpacity(0.1), const Color(0xFFC41D7F).withOpacity(0.05)],
+              colors: [ILabaColors.burgundy.withOpacity(0.1), ILabaColors.burgundy.withOpacity(0.05)],
             ),
-            border: Border.all(color: const Color(0xFFC41D7F).withOpacity(0.3)),
+            border: Border.all(color: ILabaColors.burgundy.withOpacity(0.3)),
             borderRadius: BorderRadius.circular(6),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFC41D7F).withOpacity(0.08),
+                color: ILabaColors.burgundy.withOpacity(0.08),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -720,7 +720,7 @@ class MobileBookingBasketsStep extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
-                  color: Colors.grey.shade800,
+                  color: ILabaColors.darkText,
                 ),
               ),
               // Subtotal in the middle
@@ -730,7 +730,7 @@ class MobileBookingBasketsStep extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xffC41D7F),
+                    color: ILabaColors.burgundy,
                   ),
                 ),
               // Horizontal buttons
@@ -739,19 +739,19 @@ class MobileBookingBasketsStep extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [const Color(0xFFC41D7F), const Color(0xFFA01560)],
+                        colors: [ILabaColors.burgundy, ILabaColors.burgundyDark],
                       ),
                       borderRadius: BorderRadius.circular(6),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFC41D7F).withOpacity(0.3),
+                          color: ILabaColors.burgundy.withOpacity(0.3),
                           blurRadius: 4,
                           offset: const Offset(0, 1),
                         ),
                       ],
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.remove, color: Colors.white),
+                      icon: const Icon(Icons.remove, color: ILabaColors.white),
                       onPressed: quantity > 0
                           ? () => provider.updateBasketService(
                                 'plasticBags',
@@ -765,19 +765,19 @@ class MobileBookingBasketsStep extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [const Color(0xFFC41D7F), const Color(0xFFA01560)],
+                        colors: [ILabaColors.burgundy, ILabaColors.burgundyDark],
                       ),
                       borderRadius: BorderRadius.circular(6),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFC41D7F).withOpacity(0.3),
+                          color: ILabaColors.burgundy.withOpacity(0.3),
                           blurRadius: 4,
                           offset: const Offset(0, 1),
                         ),
                       ],
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.add, color: Colors.white),
+                      icon: const Icon(Icons.add, color: ILabaColors.white),
                       onPressed: () => provider.updateBasketService(
                         'plasticBags',
                         quantity + 1,
@@ -809,8 +809,8 @@ class MobileBookingBasketsStep extends StatelessWidget {
     final serviceInfo = _getServiceInfo(provider.services, serviceType, tier);
 
     // Use pink color scheme throughout
-    const Color primaryColor = Color(0xFFC41D7F);
-    const Color secondaryColor = Color(0xFFA01560);
+    const Color primaryColor = ILabaColors.burgundy;
+    const Color secondaryColor = ILabaColors.burgundyDark;
 
     debugPrint(
       '🔍 ServiceButton: $serviceType/$tier - info=$serviceInfo, services_count=${provider.services.length}',
@@ -830,12 +830,12 @@ class MobileBookingBasketsStep extends StatelessWidget {
                   end: Alignment.bottomRight,
                 )
               : LinearGradient(
-                  colors: [Colors.white, Colors.grey.shade50],
+                  colors: [ILabaColors.white, ILabaColors.lightGray],
                 ),
           border: Border.all(
             color: isSelected
                 ? primaryColor.withOpacity(0.2)
-                : Colors.grey.shade300,
+                : ILabaColors.lightGray,
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(6),
@@ -868,7 +868,7 @@ class MobileBookingBasketsStep extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: isSelected ? Colors.white : Colors.grey.shade700,
+                color: isSelected ? ILabaColors.white : ILabaColors.lightText,
               ),
               textAlign: TextAlign.center,
             ),
@@ -881,8 +881,8 @@ class MobileBookingBasketsStep extends StatelessWidget {
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: isSelected
-                      ? Colors.white.withOpacity(0.9)
-                      : const Color(0xffC41D7F),
+                      ? ILabaColors.white.withOpacity(0.9)
+                      : ILabaColors.burgundy,
                 ),
               ),
             ],
@@ -896,8 +896,8 @@ class MobileBookingBasketsStep extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 9,
                     color: isSelected
-                        ? Colors.white.withOpacity(0.8)
-                        : Colors.grey.shade600,
+                        ? ILabaColors.white.withOpacity(0.8)
+                        : ILabaColors.lightText,
                   ),
                   textAlign: TextAlign.center,
                   maxLines: 2,
@@ -921,7 +921,7 @@ class MobileBookingBasketsStep extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: ILabaColors.lightGray,
         border: Border.all(color: Colors.grey.shade200),
         borderRadius: BorderRadius.circular(6),
         boxShadow: [
@@ -945,7 +945,7 @@ class MobileBookingBasketsStep extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Baskets Subtotal:', style: TextStyle(color: Colors.grey.shade700)),
+              Text('Baskets Subtotal:', style: TextStyle(color: ILabaColors.lightText)),
               Text(
                 '₱${breakdown.summary.subtotalBaskets.toStringAsFixed(2)}',
                 style: const TextStyle(fontWeight: FontWeight.w600),

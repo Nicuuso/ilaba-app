@@ -30,6 +30,35 @@ const double ADDITIONAL_DRY_TIME_PRICE_DEFAULT = 15.0; // ₱15 per 8 minutes
 const double PLASTIC_BAGS_PRICE_DEFAULT = 0.50; // ₱0.50 per bag fallback
 
 // ============================================================================
+// VALIDATION RESULT CLASS
+// ============================================================================
+
+/// Detailed validation result for Step 3 (Handling)
+/// Contains both overall validity status and specific missing field information
+class Step3ValidationResult {
+  final bool isValid;
+  final String errorMessage; // Single error message (for backward compatibility)
+  final List<String> missingFields; // List of missing fields for detailed display
+
+  Step3ValidationResult({
+    required this.isValid,
+    required this.errorMessage,
+    required this.missingFields,
+  });
+
+  /// Check if a specific field is missing
+  bool isFieldMissing(String fieldName) => missingFields.contains(fieldName);
+
+  /// Get formatted list of missing fields for display
+  String getMissingFieldsDisplay() {
+    if (missingFields.isEmpty) return '';
+    
+    final formatted = missingFields.map((field) => '• $field').join('\n');
+    return 'Please complete the following fields:\n\n$formatted';
+  }
+}
+
+// ============================================================================
 // SERVICE PRICING HELPERS
 // ============================================================================
 
@@ -423,21 +452,44 @@ String? validateStep2(List<OrderItem> items) {
   return null; // Always valid (products optional)
 }
 
-/// Validate Step 3: Delivery address required if delivery selected
-String? validateStep3(OrderHandling handling) {
+/// Validate Step 3: ALL fields required (pickup address, delivery address, reminder acknowledgement)
+Step3ValidationResult validateStep3(OrderHandling handling) {
+  final missingFields = <String>[];
+
   // Pickup address is always required
   if (!isValidDeliveryAddress(handling.pickupAddress)) {
-    return 'Pickup address is required';
+    missingFields.add('Pickup Address');
   }
 
-  if (handling.handlingType == HandlingType.delivery) {
-    if (!isValidDeliveryAddress(handling.deliveryAddress)) {
-      return 'Delivery address is required';
-    }    if (!handling.deliveryReminderAcknowledged) {
-      return 'Please acknowledge the delivery reminder to proceed';
-    }  }
+  // Delivery address is ALWAYS required
+  if (!isValidDeliveryAddress(handling.deliveryAddress)) {
+    missingFields.add('Delivery Address');
+  }
 
-  return null; // Valid
+  // Delivery reminder acknowledgement is ALWAYS required
+  if (!handling.deliveryReminderAcknowledged) {
+    missingFields.add('Delivery Reminder Acknowledgement');
+  }
+
+  // If there are missing fields, return invalid result
+  if (missingFields.isNotEmpty) {
+    final errorMsg = missingFields.length == 1
+        ? '${missingFields.first} is required'
+        : 'Please complete all required fields';
+    
+    return Step3ValidationResult(
+      isValid: false,
+      errorMessage: errorMsg,
+      missingFields: missingFields,
+    );
+  }
+
+  // All validations passed
+  return Step3ValidationResult(
+    isValid: true,
+    errorMessage: '',
+    missingFields: [],
+  );
 }
 
 /// Validate Step 4: GCash receipt required, payment reference required

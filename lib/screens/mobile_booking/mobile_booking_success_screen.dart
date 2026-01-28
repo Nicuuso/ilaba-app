@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:ilaba/models/order_models.dart';
+import 'package:ilaba/constants/ilaba_colors.dart';
 
 class MobileBookingSuccessScreen extends StatelessWidget {
   final OrderResponse response;
@@ -59,7 +60,7 @@ class MobileBookingSuccessScreen extends StatelessWidget {
                     children: [
                       Text(
                         'Order ID',
-                        style: TextStyle(color: Colors.grey.shade600),
+                        style: TextStyle(color: ILabaColors.lightText),
                       ),
                       const SizedBox(height: 4),
                       Container(
@@ -147,7 +148,7 @@ class MobileBookingSuccessScreen extends StatelessWidget {
                     ).popUntil((route) => route.isFirst),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.indigo,
-                      foregroundColor: Colors.white,
+                      foregroundColor: ILabaColors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     child: const Text('Return to Home'),
@@ -168,7 +169,7 @@ class MobileBookingSuccessScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: ILabaColors.lightGray),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -183,7 +184,7 @@ class MobileBookingSuccessScreen extends StatelessWidget {
           // Customer
           Row(
             children: [
-              Icon(Icons.person, color: Colors.grey.shade600, size: 20),
+              Icon(Icons.person, color: ILabaColors.lightText, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -193,7 +194,7 @@ class MobileBookingSuccessScreen extends StatelessWidget {
                       'Customer',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade600,
+                        color: ILabaColors.lightText,
                       ),
                     ),
                     Text(
@@ -212,7 +213,7 @@ class MobileBookingSuccessScreen extends StatelessWidget {
             children: [
               Icon(
                 Icons.shopping_basket,
-                color: Colors.grey.shade600,
+                color: ILabaColors.lightText,
                 size: 20,
               ),
               const SizedBox(width: 12),
@@ -224,7 +225,7 @@ class MobileBookingSuccessScreen extends StatelessWidget {
                       'Baskets',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade600,
+                        color: ILabaColors.lightText,
                       ),
                     ),
                     Text(
@@ -244,7 +245,7 @@ class MobileBookingSuccessScreen extends StatelessWidget {
               children: [
                 Icon(
                   Icons.shopping_cart,
-                  color: Colors.grey.shade600,
+                  color: ILabaColors.lightText,
                   size: 20,
                 ),
                 const SizedBox(width: 12),
@@ -256,7 +257,7 @@ class MobileBookingSuccessScreen extends StatelessWidget {
                         'Products',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade600,
+                          color: ILabaColors.lightText,
                         ),
                       ),
                       Text(
@@ -274,7 +275,7 @@ class MobileBookingSuccessScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(Icons.payment, color: Colors.grey.shade600, size: 20),
+              Icon(Icons.payment, color: ILabaColors.lightText, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -284,7 +285,7 @@ class MobileBookingSuccessScreen extends StatelessWidget {
                       'Payment Method',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade600,
+                        color: ILabaColors.lightText,
                       ),
                     ),
                     Text(
@@ -475,7 +476,7 @@ class MobileBookingSuccessScreen extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 description,
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                style: TextStyle(fontSize: 12, color: ILabaColors.lightText),
               ),
             ],
           ),

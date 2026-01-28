@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:ilaba/constants/ilaba_colors.dart';
 
 /// Supabase configuration constants
 class SupabaseConfig {
@@ -8,6 +10,76 @@ class SupabaseConfig {
 
 /// Formatting and utility functions for order details
 class OrderDetailsHelpers {
+  /// Get effective display status from order by reading handling JSONB
+  /// Main statuses: pending, processing, completed, cancelled
+  /// Handling contains: pickup.status and delivery.status
+  static String getEffectiveStatus(Map<String, dynamic> order) {
+    final mainStatus = (order['status'] as String?)?.toLowerCase() ?? 'pending';
+    
+    // Parse handling JSONB - it may be a String or a Map
+    Map<String, dynamic> handling = {};
+    final handlingData = order['handling'];
+    if (handlingData is String) {
+      try {
+        if (handlingData.isNotEmpty) {
+          final decoded = jsonDecode(handlingData);
+          if (decoded is Map) {
+            handling = Map<String, dynamic>.from(decoded);
+          }
+        }
+      } catch (e) {
+        debugPrint('⚠️ Error parsing handling JSON: $e');
+      }
+    } else if (handlingData is Map) {
+      handling = Map<String, dynamic>.from(handlingData);
+    }
+    
+    final pickupData = handling['pickup'] as Map<String, dynamic>? ?? {};
+    final deliveryData = handling['delivery'] as Map<String, dynamic>? ?? {};
+    
+    final pickupStatus = (pickupData['status'] as String?)?.toLowerCase() ?? 'pending';
+    final deliveryStatus = (deliveryData['status'] as String?)?.toLowerCase() ?? 'pending';
+    
+    debugPrint('📊 getEffectiveStatus: main=$mainStatus, pickup=$pickupStatus, delivery=$deliveryStatus');
+    
+    // Determine effective status for display
+    // The badge should reflect the ACTUAL current step, not generalized
+    
+    // 1. Cancelled always takes priority
+    if (mainStatus == 'cancelled') {
+      return 'cancelled';
+    }
+    
+    // 2. Completed - when main status is completed or delivery is done
+    if (mainStatus == 'completed' || deliveryStatus == 'completed') {
+      return 'completed';
+    }
+    
+    // 3. For Delivery - when delivery is in progress
+    if (deliveryStatus == 'in_progress') {
+      return 'for_delivery';
+    }
+    
+    // 4. For Pick-up - when pickup is in progress (BEFORE checking processing!)
+    if (pickupStatus == 'in_progress') {
+      return 'for_pick-up';
+    }
+    
+    // 5. Processing - when pickup is done but delivery hasn't started
+    if ((pickupStatus == 'completed' || pickupStatus == 'skipped') && 
+        deliveryStatus == 'pending') {
+      return 'processing';
+    }
+    
+    // 6. Main status is processing (fallback)
+    if (mainStatus == 'processing') {
+      return 'processing';
+    }
+    
+    // 7. Default to pending
+    return 'pending';
+  }
+
   /// Get product image URL from Supabase bucket
   static String getProductImageUrl(dynamic imageData) {
     if (imageData == null) {
@@ -67,7 +139,7 @@ class OrderDetailsHelpers {
     if (amount is String) {
       return '₱${(double.tryParse(amount) ?? 0).toStringAsFixed(2)}';
     } else if (amount is num) {
-      return '₱${(amount as num).toDouble().toStringAsFixed(2)}';
+      return '₱${amount.toDouble().toStringAsFixed(2)}';
     }
     return '₱0.00';
   }
@@ -89,19 +161,90 @@ class OrderDetailsHelpers {
         );
   }
 
+  /// Normalize status to match app's expected format
+  /// Handles variations from website: for_pickup, for_pick-up, pickup, pick-up, for pickup, etc.
+  static String normalizeStatus(String? status) {
+    if (status == null || status.isEmpty) return 'pending';
+    
+    final lowerStatus = status.toLowerCase().trim();
+    
+    // Handle all pickup variations
+    if (lowerStatus.contains('pick') && lowerStatus.contains('up')) {
+      return 'for_pick-up';
+    }
+    if (lowerStatus == 'pickup' || lowerStatus == 'pick-up' || lowerStatus == 'pick_up') {
+      return 'for_pick-up';
+    }
+    
+    // Handle all delivery variations
+    if (lowerStatus.contains('delivery') || lowerStatus == 'for_delivery' || lowerStatus == 'fordelivery') {
+      return 'for_delivery';
+    }
+    
+    // Return as-is for other statuses
+    return lowerStatus;
+  }
+
   /// Get color based on status
   static Color getStatusColor(String? status) {
-    switch (status?.toLowerCase()) {
-      case 'completed':
-        return Colors.green;
+    final normalizedStatus = normalizeStatus(status);
+    switch (normalizedStatus) {
       case 'pending':
         return Colors.orange;
+      case 'for_pick-up':
+        return Colors.indigo;
       case 'processing':
         return Colors.blue;
+      case 'for_delivery':
+        return Colors.purple;
+      case 'completed':
+        return Colors.green;
       case 'cancelled':
         return Colors.red;
       default:
         return Colors.grey;
+    }
+  }
+
+  /// Get icon based on status
+  static IconData getStatusIcon(String? status) {
+    final normalizedStatus = normalizeStatus(status);
+    switch (normalizedStatus) {
+      case 'pending':
+        return Icons.schedule;
+      case 'for_pick-up':
+        return Icons.local_shipping;
+      case 'processing':
+        return Icons.local_laundry_service;
+      case 'for_delivery':
+        return Icons.delivery_dining;
+      case 'completed':
+        return Icons.check_circle;
+      case 'cancelled':
+        return Icons.cancel;
+      default:
+        return Icons.help_outline;
+    }
+  }
+
+  /// Get status label
+  static String getStatusLabel(String? status) {
+    final normalizedStatus = normalizeStatus(status);
+    switch (normalizedStatus) {
+      case 'pending':
+        return 'Pending';
+      case 'for_pick-up':
+        return 'For Pick-up';
+      case 'processing':
+        return 'Processing';
+      case 'for_delivery':
+        return 'For Delivery';
+      case 'completed':
+        return 'Completed';
+      case 'cancelled':
+        return 'Cancelled';
+      default:
+        return formatLabel(status ?? 'Unknown');
     }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ilaba/constants/ilaba_colors.dart';
 
 class HelpCenterScreen extends StatelessWidget {
   const HelpCenterScreen({super.key});
@@ -34,7 +35,7 @@ class HelpCenterScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: ILabaColors.white,
 
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(

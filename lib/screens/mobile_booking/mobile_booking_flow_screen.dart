@@ -12,6 +12,7 @@ import 'package:ilaba/screens/mobile_booking/mobile_booking_products_step.dart';
 import 'package:ilaba/screens/mobile_booking/mobile_booking_handling_step.dart';
 import 'package:ilaba/screens/mobile_booking/mobile_booking_payment_step.dart';
 import 'package:ilaba/screens/mobile_booking/mobile_booking_success_screen.dart';
+import 'package:ilaba/constants/ilaba_colors.dart';
 
 class MobileBookingFlowScreen extends StatefulWidget {
   const MobileBookingFlowScreen({Key? key}) : super(key: key);
@@ -41,13 +42,47 @@ class _MobileBookingFlowScreenState extends State<MobileBookingFlowScreen> {
   void _goToNextStep(BuildContext context) {
     final provider = context.read<MobileBookingProvider>();
 
-    // Validate current step
-    final error = provider.validateCurrentStep(_currentStep + 1);
-    if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error), backgroundColor: Colors.red),
-      );
-      return;
+    // For Step 3 (handling/delivery), show detailed validation with snackbar
+    if (_currentStep == 2) { // Current step is 2 (0-indexed), going to step 3
+      final validationResult = provider.getStep3ValidationDetails();
+      if (!validationResult.isValid) {
+        // Show snackbar with missing fields list
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Please complete all required fields:',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                const SizedBox(height: 8),
+                ...validationResult.missingFields.map((field) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Text('• $field'),
+                  );
+                }).toList(),
+              ],
+            ),
+            backgroundColor: Colors.red.shade600,
+            duration: const Duration(seconds: 5),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+        return;
+      }
+    } else {
+      // For other steps, use standard validation
+      final error = provider.validateCurrentStep(_currentStep + 1);
+      if (error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error), backgroundColor: Colors.red),
+        );
+        return;
+      }
     }
 
     // Move to next step
@@ -83,8 +118,8 @@ class _MobileBookingFlowScreenState extends State<MobileBookingFlowScreen> {
         appBar: AppBar(
           title: const Text('Book Laundry Service'),
           elevation: 0,
-          backgroundColor: Colors.indigo.shade600,
-          foregroundColor: Colors.white,
+          backgroundColor: ILabaColors.burgundy,
+          foregroundColor: ILabaColors.white,
           centerTitle: true,
         ),
         body: Consumer<MobileBookingProvider>(
@@ -176,7 +211,7 @@ class _MobileBookingFlowScreenState extends State<MobileBookingFlowScreen> {
   /// Build step indicator (1/2/3/4)
   Widget _buildStepIndicator() {
     return Container(
-      color: Colors.grey.shade50,
+      color: ILabaColors.lightGray,
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -187,7 +222,7 @@ class _MobileBookingFlowScreenState extends State<MobileBookingFlowScreen> {
                 child: Container(
                   height: 1.5,
                   color: _currentStep > i
-                      ? Colors.indigo
+                      ? ILabaColors.burgundy
                       : Colors.grey.shade200,
                 ),
               ),
@@ -196,13 +231,13 @@ class _MobileBookingFlowScreenState extends State<MobileBookingFlowScreen> {
               height: 32,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentStep >= i ? Colors.indigo : Colors.grey.shade200,
+                color: _currentStep >= i ? ILabaColors.burgundy : Colors.grey.shade200,
               ),
               child: Center(
                 child: Text(
                   '${i + 1}',
                   style: TextStyle(
-                    color: _currentStep >= i ? Colors.white : Colors.grey.shade500,
+                    color: _currentStep >= i ? ILabaColors.white : Colors.grey.shade500,
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
                   ),
@@ -223,14 +258,14 @@ class _MobileBookingFlowScreenState extends State<MobileBookingFlowScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.white, Colors.grey.shade50],
+          colors: [ILabaColors.white, ILabaColors.lightGray],
         ),
         border: Border(
-          top: BorderSide(color: const Color(0xFFC41D7F).withOpacity(0.2), width: 2),
+          top: BorderSide(color: ILabaColors.burgundy.withOpacity(0.2), width: 2),
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFC41D7F).withOpacity(0.08),
+            color: ILabaColors.burgundy.withOpacity(0.08),
             blurRadius: 12,
             offset: const Offset(0, -4),
           ),
@@ -256,7 +291,7 @@ class _MobileBookingFlowScreenState extends State<MobileBookingFlowScreen> {
                     onPressed: _goToPreviousStep,
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      side: BorderSide(color: Colors.grey.shade300),
+                      side: BorderSide(color: ILabaColors.lightGray),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
                       ),
@@ -272,14 +307,14 @@ class _MobileBookingFlowScreenState extends State<MobileBookingFlowScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [const Color(0xFFC41D7F), const Color(0xFFA01560)],
+                      colors: [ILabaColors.burgundy, ILabaColors.burgundyDark],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(6),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFC41D7F).withOpacity(0.3),
+                        color: ILabaColors.burgundy.withOpacity(0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -294,7 +329,7 @@ class _MobileBookingFlowScreenState extends State<MobileBookingFlowScreen> {
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.white,
+                      foregroundColor: ILabaColors.white,
                       shadowColor: Colors.transparent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
@@ -306,7 +341,7 @@ class _MobileBookingFlowScreenState extends State<MobileBookingFlowScreen> {
                             width: 18,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation(Colors.white),
+                              valueColor: AlwaysStoppedAnimation(ILabaColors.white),
                             ),
                           )
                         : Text(
@@ -338,12 +373,12 @@ class _MobileBookingFlowScreenState extends State<MobileBookingFlowScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: provider.activeBasketIndex == i
-                        ? Colors.indigo
+                        ? ILabaColors.burgundy
                         : Colors.grey.shade100,
                     border: Border.all(
                       color: provider.activeBasketIndex == i
-                          ? Colors.indigo
-                          : Colors.grey.shade300,
+                          ? ILabaColors.burgundy
+                          : ILabaColors.lightGray,
                     ),
                     borderRadius: BorderRadius.circular(6),
                   ),
@@ -353,8 +388,8 @@ class _MobileBookingFlowScreenState extends State<MobileBookingFlowScreen> {
                       fontWeight: FontWeight.w500,
                       fontSize: 13,
                       color: provider.activeBasketIndex == i
-                          ? Colors.white
-                          : Colors.grey.shade700,
+                          ? ILabaColors.white
+                          : ILabaColors.lightText,
                     ),
                   ),
                 ),
@@ -376,7 +411,7 @@ class _MobileBookingFlowScreenState extends State<MobileBookingFlowScreen> {
             label: const Text('Add Basket'),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 10),
-              side: BorderSide(color: Colors.grey.shade300),
+              side: BorderSide(color: ILabaColors.lightGray),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(6),
               ),

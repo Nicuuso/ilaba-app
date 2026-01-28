@@ -57,7 +57,10 @@ class AuthProvider extends ChangeNotifier {
         errorMsg = errorMsg.substring(10);
       }
       _errorMessage = errorMsg;
+      // Set loading to false BEFORE notifying so UI removes loading immediately
       _isLoading = false;
+      // Add a small delay to ensure the loading state is fully removed before showing snackbar
+      await Future.delayed(const Duration(milliseconds: 50));
       notifyListeners();
       return false;
     }

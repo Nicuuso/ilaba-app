@@ -4,6 +4,7 @@ import 'package:ilaba/services/registration_service.dart';
 import 'package:ilaba/screens/auth/registration_confirmation_screen.dart';
 import 'package:ilaba/screens/info/terms_of_service_screen.dart';
 import 'package:ilaba/screens/info/privacy_policy_screen.dart';
+import 'package:ilaba/constants/ilaba_colors.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});

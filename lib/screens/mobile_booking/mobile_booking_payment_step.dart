@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:ilaba/models/order_models.dart';
 import 'package:ilaba/providers/mobile_booking_provider.dart';
+import 'package:ilaba/constants/ilaba_colors.dart';
 
 class MobileBookingPaymentStep extends StatefulWidget {
   const MobileBookingPaymentStep({Key? key}) : super(key: key);
@@ -89,7 +90,7 @@ class _MobileBookingPaymentStepState extends State<MobileBookingPaymentStep> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: ILabaColors.lightGray),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -183,7 +184,7 @@ class _MobileBookingPaymentStepState extends State<MobileBookingPaymentStep> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: ILabaColors.lightGray,
         border: Border.all(color: Colors.grey.shade200),
         borderRadius: BorderRadius.circular(6),
         boxShadow: [
@@ -263,11 +264,12 @@ class _MobileBookingPaymentStepState extends State<MobileBookingPaymentStep> {
                             '• Fold: ₱${_getServicePrice(provider, 'fold', null).toStringAsFixed(2)}',
                             style: const TextStyle(fontSize: 10, color: Colors.grey),
                           ),
-                        if (basket.services.plasticBags > 0)
-                          Text(
-                            '• Plastic Bags x${basket.services.plasticBags}: ₱${(basket.services.plasticBags * _getProductPrice(provider, 'plastic')).toStringAsFixed(2)}',
-                            style: const TextStyle(fontSize: 10, color: Colors.grey),
-                          ),
+                        // HIDDEN: Plastic Bags option
+                        // if (basket.services.plasticBags > 0)
+                        //   Text(
+                        //     '• Plastic Bags x${basket.services.plasticBags}: ₱${(basket.services.plasticBags * _getProductPrice(provider, 'plastic')).toStringAsFixed(2)}',
+                        //     style: const TextStyle(fontSize: 10, color: Colors.grey),
+                        //   ),
                       ],
                     ),
                   ),
@@ -454,12 +456,12 @@ class _MobileBookingPaymentStepState extends State<MobileBookingPaymentStep> {
           border: Border.all(
             color: hasEnoughPoints 
               ? (isSelected ? Colors.amber : Colors.amber.shade200)
-              : Colors.grey.shade300,
+              : ILabaColors.lightGray,
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(8),
           color: hasEnoughPoints
-            ? (isSelected ? Colors.amber.shade100 : Colors.white)
+            ? (isSelected ? Colors.amber.shade100 : ILabaColors.white)
             : Colors.grey.shade100,
         ),
         child: Row(
@@ -482,7 +484,7 @@ class _MobileBookingPaymentStepState extends State<MobileBookingPaymentStep> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
-                      color: hasEnoughPoints ? Colors.black : Colors.grey.shade600,
+                      color: hasEnoughPoints ? Colors.black : ILabaColors.lightText,
                     ),
                   ),
                   Row(
@@ -492,7 +494,7 @@ class _MobileBookingPaymentStepState extends State<MobileBookingPaymentStep> {
                         description,
                         style: TextStyle(
                           fontSize: 11,
-                          color: hasEnoughPoints ? Colors.grey.shade700 : Colors.grey.shade500,
+                          color: hasEnoughPoints ? ILabaColors.lightText : Colors.grey.shade500,
                         ),
                       ),
                       if (tier != null && discount > 0)
@@ -603,7 +605,7 @@ class _MobileBookingPaymentStepState extends State<MobileBookingPaymentStep> {
               children: [
                 Text(
                   'Please upload a photo of your GCash receipt to complete the payment',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  style: TextStyle(fontSize: 12, color: ILabaColors.lightText),
                 ),
                 const SizedBox(height: 12),
                 ElevatedButton.icon(
@@ -611,8 +613,8 @@ class _MobileBookingPaymentStepState extends State<MobileBookingPaymentStep> {
                   icon: const Icon(Icons.camera_alt),
                   label: const Text('Upload Receipt'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.indigo,
-                    foregroundColor: Colors.white,
+                    backgroundColor: ILabaColors.burgundy,
+                    foregroundColor: ILabaColors.white,
                   ),
                 ),
               ],
@@ -650,9 +652,9 @@ class _MobileBookingPaymentStepState extends State<MobileBookingPaymentStep> {
           const SizedBox(height: 10),
           // Receipt Upload
           _buildReceiptUpload(context, provider),
-          const SizedBox(height: 12),
-          // Reference Number
-          _buildGCashReference(context, provider),
+          // HIDDEN: GCash Reference Number
+          // const SizedBox(height: 12),
+          // _buildGCashReference(context, provider),
         ],
       ),
     );
@@ -688,7 +690,7 @@ class _MobileBookingPaymentStepState extends State<MobileBookingPaymentStep> {
         const SizedBox(height: 6),
         Text(
           'This is the reference number provided by GCash',
-          style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+          style: TextStyle(fontSize: 11, color: ILabaColors.lightText),
         ),
       ],
     );
@@ -703,8 +705,8 @@ class _MobileBookingPaymentStepState extends State<MobileBookingPaymentStep> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.indigo.shade50,
-        border: Border.all(color: Colors.indigo),
+        color: ILabaColors.burgundy.withOpacity(0.1),
+        border: Border.all(color: ILabaColors.burgundy),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -753,7 +755,7 @@ class _MobileBookingPaymentStepState extends State<MobileBookingPaymentStep> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.indigo,
+                  color: ILabaColors.burgundy,
                 ),
               ),
               Text(
@@ -761,7 +763,7 @@ class _MobileBookingPaymentStepState extends State<MobileBookingPaymentStep> {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.indigo,
+                  color: ILabaColors.burgundy,
                 ),
               ),
             ],
@@ -769,7 +771,7 @@ class _MobileBookingPaymentStepState extends State<MobileBookingPaymentStep> {
           const SizedBox(height: 8),
           Text(
             'Payment method: GCash',
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 12, color: ILabaColors.lightText),
           ),
         ],
       ),

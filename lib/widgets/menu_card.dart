@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ilaba/constants/ilaba_colors.dart';
 
 class MenuCard extends StatelessWidget {
   final String title;
@@ -16,71 +17,61 @@ class MenuCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Left: Title, description, button
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  description,
-                  style: const TextStyle(fontSize: 14, color: Colors.black54),
-                ),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 64,
-                      vertical: 8,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    backgroundColor: const Color.fromARGB(255, 253, 132, 174),
-                    elevation: 0,
-                  ),
-                  onPressed: onPressed,
-                  child: const Text(
-                    'Go',
-                    style: TextStyle(
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: ILabaColors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: ILabaColors.softShadow,
+          border: Border.all(
+            color: ILabaColors.border,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            // Left: Title and description
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
                       fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.bold,
+                      color: ILabaColors.darkText,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 6),
+                  Text(
+                    description,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: ILabaColors.lightText,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          // Right: Icon
-          Container(
-            margin: const EdgeInsets.only(left: 16),
-            child: Icon(
-              icon,
-              size: 48,
-              color: const Color.fromARGB(255, 253, 132, 174),
+            const SizedBox(width: 12),
+            // Right: Icon
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: ILabaColors.burgundy.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                size: 28,
+                color: ILabaColors.burgundy,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

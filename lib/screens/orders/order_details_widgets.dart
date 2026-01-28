@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'order_details_helpers.dart';
+import 'package:ilaba/constants/ilaba_colors.dart';
 
 /// Reusable UI widgets for order details screen
 class OrderDetailsWidgets {
@@ -183,7 +184,7 @@ class OrderDetailsWidgets {
         borderRadius: BorderRadius.circular(10),
         side: BorderSide(color: Colors.grey[200]!, width: 0.8),
       ),
-      color: Colors.white,
+      color: ILabaColors.white,
       child: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
@@ -282,7 +283,8 @@ class OrderDetailsWidgets {
     );
     final customerEmail = OrderDataExtractor.extractEmail(customerData, order);
     final cashierName = OrderDataExtractor.extractStaffName(staffData, order);
-    final status = order['status'] ?? 'N/A';
+    // Use effective status from handling JSONB instead of just main status
+    final status = OrderDetailsHelpers.getEffectiveStatus(order);
     final createdAt = OrderDetailsHelpers.formatDate(order['created_at']);
     final pickupAddress = OrderDataExtractor.extractPickupAddress(order);
     final deliveryAddress = OrderDataExtractor.extractDeliveryAddress(order);
@@ -298,12 +300,12 @@ class OrderDetailsWidgets {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ILabaColors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey[200]!, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: ILabaColors.darkText.withOpacity(0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -349,20 +351,31 @@ class OrderDetailsWidgets {
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 11,
-                      vertical: 6,
+                      horizontal: 12,
+                      vertical: 8,
                     ),
                     decoration: BoxDecoration(
                       color: statusColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Text(
-                      status.toUpperCase(),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                        fontSize: 11,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          OrderDetailsHelpers.getStatusIcon(status),
+                          color: ILabaColors.white,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          OrderDetailsHelpers.getStatusLabel(status),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: ILabaColors.white,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -399,14 +412,33 @@ class OrderDetailsWidgets {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    buildInlineInfo(
-                      cashierName,
-                      Icons.person_pin_outlined,
-                      valueStyle: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[900],
-                      ),
+                    Row(
+                      children: [
+                        Icon(Icons.person_pin_outlined, size: 14, color: Colors.grey[600]),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            'Cashier: ',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ),
+                        Flexible(
+                          child: Text(
+                            cashierName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[900],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

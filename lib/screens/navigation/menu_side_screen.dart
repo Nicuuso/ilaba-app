@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ilaba/providers/auth_provider.dart';
+import 'package:ilaba/screens/settings/settings_screen.dart';
+import 'package:ilaba/screens/account/account_center_screen.dart';
+import 'package:ilaba/constants/ilaba_colors.dart';
 
 class MenuSideScreen extends StatelessWidget {
   const MenuSideScreen({super.key});
@@ -46,10 +49,10 @@ class MenuSideScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header
+          // Header - Updated to use burgundy color
           DrawerHeader(
             decoration: const BoxDecoration(
-              color: Color.fromARGB(255, 253, 132, 174),
+              color: ILabaColors.burgundy,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,18 +60,18 @@ class MenuSideScreen extends StatelessWidget {
               children: const [
                 CircleAvatar(
                   radius: 28,
-                  backgroundColor: Colors.white,
+                  backgroundColor: ILabaColors.white,
                   child: Icon(
                     Icons.person,
                     size: 40,
-                    color: Color.fromARGB(255, 253, 132, 174),
+                    color: ILabaColors.burgundy,
                   ),
                 ),
                 SizedBox(height: 12),
                 Text(
                   "Welcome, User!",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: ILabaColors.white,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -79,19 +82,29 @@ class MenuSideScreen extends StatelessWidget {
 
           // Navigation items
           ListTile(
-            leading: const Icon(Icons.people),
-            title: const Text("Accounts"),
+            leading: const Icon(Icons.account_circle, color: ILabaColors.burgundy),
+            title: const Text("Account Center"),
             onTap: () {
               Navigator.pop(context);
-              // TODO: Navigate to Accounts screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AccountCenterScreen(),
+                ),
+              );
             },
           ),
           ListTile(
-            leading: const Icon(Icons.settings),
+            leading: const Icon(Icons.settings, color: ILabaColors.burgundy),
             title: const Text("Settings"),
             onTap: () {
               Navigator.pop(context);
-              // TODO: Navigate to FAQs screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
             },
           ),
           const Spacer(),

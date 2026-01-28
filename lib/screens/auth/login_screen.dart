@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:ilaba/providers/auth_provider.dart';
 import 'package:ilaba/screens/auth/signup_screen.dart';
 import 'package:ilaba/screens/auth/forgot_password_screen.dart';
+import 'package:ilaba/constants/ilaba_colors.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -63,6 +64,8 @@ class _LoginScreenState extends State<LoginScreen> {
           authProvider.errorMessage ?? 'Login failed. Please try again.';
       debugPrint('❌ Login failed: $errorMsg');
       _showErrorSnackbar(errorMsg);
+      // Also show alert dialog to ensure error is visible
+      _showErrorDialog(errorMsg);
     }
   }
 
@@ -76,13 +79,46 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showErrorSnackbar(String message) {
+    // Clear any existing snackbars first
+    ScaffoldMessenger.of(context).clearSnackBars();
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red.shade400,
-        duration: const Duration(seconds: 3),
+        content: Text(
+          message,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        backgroundColor: Colors.red.shade600,
+        duration: const Duration(seconds: 4),
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        elevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          'Login Error',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+        ),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
       ),
     );
   }

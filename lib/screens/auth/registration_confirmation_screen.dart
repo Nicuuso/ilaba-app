@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ilaba/screens/auth/login_screen.dart';
+import 'package:ilaba/constants/ilaba_colors.dart';
 
 class RegistrationConfirmationScreen extends StatelessWidget {
   final String email;

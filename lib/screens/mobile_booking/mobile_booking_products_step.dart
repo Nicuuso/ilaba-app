@@ -8,6 +8,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ilaba/providers/mobile_booking_provider.dart';
+import 'package:ilaba/screens/mobile_booking/order_summary_expandable.dart';
+import 'package:ilaba/constants/ilaba_colors.dart';
 
 class MobileBookingProductsStep extends StatefulWidget {
   const MobileBookingProductsStep({Key? key}) : super(key: key);
@@ -85,7 +87,7 @@ class _MobileBookingProductsStepState extends State<MobileBookingProductsStep> {
                                 ? 'No products available'
                                 : 'No products found',
                             style: TextStyle(
-                              color: Colors.grey.shade600,
+                              color: ILabaColors.lightText,
                               fontSize: 16,
                             ),
                           ),
@@ -110,9 +112,12 @@ class _MobileBookingProductsStepState extends State<MobileBookingProductsStep> {
                     ),
             ),
 
-            // Selected Products Summary
-            if (provider.selectedProducts.isNotEmpty)
-              _buildSelectedProductsSummary(context, provider),
+            // Order Summary - Always visible
+            OrderSummaryExpandable(
+              provider: provider,
+              showProductBreakdown: true,
+              showDeliveryFee: false,
+            ),
           ],
         );
       },
@@ -182,7 +187,7 @@ class _MobileBookingProductsStepState extends State<MobileBookingProductsStep> {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.indigo,
+                      color: ILabaColors.burgundy,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -202,13 +207,17 @@ class _MobileBookingProductsStepState extends State<MobileBookingProductsStep> {
             // Quantity Controls
             if (quantity == 0)
               ElevatedButton(
-                onPressed: () => provider.addProduct(product.id),
+                onPressed: product.quantityInStock > 0
+                    ? () => provider.addProduct(product.id)
+                    : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.indigo,
-                  foregroundColor: Colors.white,
+                  backgroundColor: ILabaColors.burgundy,
+                  foregroundColor: ILabaColors.white,
+                  disabledBackgroundColor: Colors.grey.shade300,
+                  disabledForegroundColor: Colors.grey.shade500,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                 ),
-                child: const Text('Add'),
+                child: Text(product.quantityInStock > 0 ? 'Add' : 'Out of Stock'),
               )
             else
               Column(
@@ -238,11 +247,18 @@ class _MobileBookingProductsStepState extends State<MobileBookingProductsStep> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: () => provider.setProductQuantity(
-                          product.id,
-                          quantity + 1,
+                        icon: Icon(
+                          Icons.add,
+                          color: quantity >= product.quantityInStock
+                              ? Colors.grey.shade400
+                              : null,
                         ),
+                        onPressed: quantity >= product.quantityInStock
+                            ? null
+                            : () => provider.setProductQuantity(
+                                  product.id,
+                                  quantity + 1,
+                                ),
                         constraints: const BoxConstraints(
                           minWidth: 36,
                           minHeight: 36,
@@ -256,77 +272,21 @@ class _MobileBookingProductsStepState extends State<MobileBookingProductsStep> {
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: Colors.indigo,
+                      color: ILabaColors.burgundy,
                     ),
                   ),
+                  if (quantity >= product.quantityInStock)
+                    Text(
+                      'Max stock reached',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.orange.shade700,
+                      ),
+                    ),
                 ],
               ),
           ],
         ),
-      ),
-    );
-  }
-
-  /// Build selected products summary
-  Widget _buildSelectedProductsSummary(
-    BuildContext context,
-    MobileBookingProvider provider,
-  ) {
-    final breakdown = provider.calculateOrderTotal();
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.indigo.shade50,
-        border: Border(top: BorderSide(color: Colors.indigo.shade200)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Products Summary',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          ...provider.selectedProductItems.map((item) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '${item.productName} x${item.quantity}',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  Text(
-                    '₱${item.totalPrice.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
-          const Divider(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Subtotal:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Text(
-                '₱${breakdown.summary.subtotalProducts.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.indigo,
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }

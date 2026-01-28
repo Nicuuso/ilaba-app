@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ilaba/constants/ilaba_colors.dart';
 
 class TermsOfServiceScreen extends StatelessWidget {
   const TermsOfServiceScreen({super.key});

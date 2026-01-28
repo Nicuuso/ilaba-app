@@ -459,7 +459,9 @@ class MobileBookingProvider extends ChangeNotifier {
           amountPaid: 0,
           deliveryReminderAcknowledged: _deliveryReminderAcknowledged,
         );
-        return validateStep3(handling);
+        final result = validateStep3(handling);
+        // Return error message for backward compatibility (used in step submission)
+        return result.isValid ? null : result.errorMessage;
       case 4:
         final handling = OrderHandling(
           handlingType: _handlingType,
@@ -477,6 +479,20 @@ class MobileBookingProvider extends ChangeNotifier {
       default:
         return null;
     }
+  }
+
+  /// Get detailed Step 3 validation result with missing fields
+  Step3ValidationResult getStep3ValidationDetails() {
+    final handling = OrderHandling(
+      handlingType: _handlingType,
+      pickupAddress: _pickupAddress,
+      deliveryAddress: _deliveryAddress,
+      timeSlot: _timeSlot,
+      paymentMethod: PaymentMethod.gcash,
+      amountPaid: 0,
+      deliveryReminderAcknowledged: _deliveryReminderAcknowledged,
+    );
+    return validateStep3(handling);
   }
 
   // ============================================================================

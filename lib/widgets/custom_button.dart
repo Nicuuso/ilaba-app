@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ilaba/constants/ilaba_colors.dart';
 
 class CustomButton extends StatelessWidget {
   final String label;
@@ -28,7 +29,7 @@ class CustomButton extends StatelessWidget {
             style ??
             ElevatedButton.styleFrom(
               backgroundColor: const Color.fromARGB(255, 253, 132, 174),
-              foregroundColor: Colors.white,
+              foregroundColor: ILabaColors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -40,7 +41,7 @@ class CustomButton extends StatelessWidget {
                 width: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(ILabaColors.white),
                 ),
               )
             : Text(label),

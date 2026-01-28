@@ -5,8 +5,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ilaba/models/order_models.dart';
 import 'package:ilaba/providers/mobile_booking_provider.dart';
+import 'package:ilaba/screens/mobile_booking/order_summary_expandable.dart';
+import 'package:ilaba/constants/ilaba_colors.dart';
 
 class MobileBookingHandlingStep extends StatefulWidget {
   const MobileBookingHandlingStep({Key? key}) : super(key: key);
@@ -44,9 +45,9 @@ class _MobileBookingHandlingStepState extends State<MobileBookingHandlingStep> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Delivery Date Selection
-              _buildDeliveryDateSelection(context, provider),
-              const SizedBox(height: 16),
+              // HIDDEN: Delivery Date Selection
+              // _buildDeliveryDateSelection(context, provider),
+              // const SizedBox(height: 16),
 
               // Pickup Address
               _buildPickupAddressDisplay(context, provider),
@@ -99,7 +100,7 @@ class _MobileBookingHandlingStepState extends State<MobileBookingHandlingStep> {
             ),
             prefixIcon: const Padding(
               padding: EdgeInsets.only(top: 12),
-              child: Icon(Icons.location_on, color: Colors.indigo),
+              child: Icon(Icons.location_on, color: ILabaColors.burgundy),
             ),
             contentPadding: const EdgeInsets.all(12),
           ),
@@ -137,7 +138,7 @@ class _MobileBookingHandlingStepState extends State<MobileBookingHandlingStep> {
             ),
             prefixIcon: const Padding(
               padding: EdgeInsets.only(top: 12),
-              child: Icon(Icons.local_shipping_outlined, color: Colors.indigo),
+              child: Icon(Icons.local_shipping_outlined, color: ILabaColors.burgundy),
             ),
             contentPadding: const EdgeInsets.all(12),
           ),
@@ -218,24 +219,24 @@ class _MobileBookingHandlingStepState extends State<MobileBookingHandlingStep> {
         decoration: BoxDecoration(
           gradient: isSelected
               ? const LinearGradient(
-                  colors: [Color(0xFFC41D7F), Color(0xFFA01560)],
+                  colors: [ILabaColors.burgundy, ILabaColors.burgundyDark],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 )
               : LinearGradient(
-                  colors: [Colors.white, Colors.grey.shade50],
+                  colors: [ILabaColors.white, ILabaColors.lightGray],
                 ),
           border: Border.all(
             color: isSelected
-                ? const Color(0xFFC41D7F).withOpacity(0.2)
-                : Colors.grey.shade300,
+                ? ILabaColors.burgundy.withOpacity(0.2)
+                : ILabaColors.lightGray,
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(6),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: const Color(0xFFC41D7F).withOpacity(0.25),
+                    color: ILabaColors.burgundy.withOpacity(0.25),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),
@@ -253,14 +254,14 @@ class _MobileBookingHandlingStepState extends State<MobileBookingHandlingStep> {
             Icon(
               isSelected ? Icons.calendar_today : Icons.calendar_month,
               size: 32,
-              color: isSelected ? Colors.white : Colors.grey,
+              color: isSelected ? ILabaColors.white : Colors.grey,
             ),
             const SizedBox(height: 8),
             Text(
               label,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : Colors.black,
+                color: isSelected ? ILabaColors.white : Colors.black,
               ),
             ),
             const SizedBox(height: 4),
@@ -269,7 +270,7 @@ class _MobileBookingHandlingStepState extends State<MobileBookingHandlingStep> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 11,
-                color: isSelected ? Colors.white.withOpacity(0.9) : Colors.grey.shade600,
+                color: isSelected ? ILabaColors.white.withOpacity(0.9) : ILabaColors.lightText,
               ),
             ),
           ],
@@ -278,12 +279,6 @@ class _MobileBookingHandlingStepState extends State<MobileBookingHandlingStep> {
     );
   }
 
-  /// Check if both addresses are valid (not empty or just spaces)
-  bool _isAddressValid() {
-    final pickupValid = _pickupAddressController.text.trim().isNotEmpty;
-    final deliveryValid = _deliveryAddressController.text.trim().isNotEmpty;
-    return pickupValid && deliveryValid;
-  }
   Future<void> _showDatePicker(BuildContext context) async {
     final selected = await showDatePicker(
       context: context,
@@ -303,7 +298,7 @@ class _MobileBookingHandlingStepState extends State<MobileBookingHandlingStep> {
   ) {
     return GestureDetector(
       onTap: () {
-        provider.setDeliveryReminderAcknowledged(!(provider.deliveryReminderAcknowledged ?? false));
+        provider.setDeliveryReminderAcknowledged(!provider.deliveryReminderAcknowledged);
       },
       child: Center(
         child: ConstrainedBox(
@@ -340,7 +335,7 @@ class _MobileBookingHandlingStepState extends State<MobileBookingHandlingStep> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Checkbox(
-                      value: provider.deliveryReminderAcknowledged ?? false,
+                      value: provider.deliveryReminderAcknowledged,
                       onChanged: (value) => provider.setDeliveryReminderAcknowledged(value ?? false),
                       activeColor: Colors.orange.shade700,
                     ),
@@ -364,108 +359,10 @@ class _MobileBookingHandlingStepState extends State<MobileBookingHandlingStep> {
     BuildContext context,
     MobileBookingProvider provider,
   ) {
-    final breakdown = provider.calculateOrderTotal();
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        border: Border.all(color: Colors.grey.shade200),
-        borderRadius: BorderRadius.circular(6),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Order Summary',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 12),
-          Divider(color: Colors.grey.shade200, height: 1),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Baskets:', style: TextStyle(color: Colors.grey.shade700)),
-              Text(
-                '₱${breakdown.summary.subtotalBaskets.toStringAsFixed(2)}',
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Products:'),
-              Text('₱${breakdown.summary.subtotalProducts.toStringAsFixed(2)}'),
-            ],
-          ),
-          if (breakdown.summary.staffServiceFee > 0)
-            Column(
-              children: [
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Staff Fee:'),
-                    Text(
-                      '₱${breakdown.summary.staffServiceFee.toStringAsFixed(2)}',
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          if (_isAddressValid())
-            Column(
-              children: [
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Delivery Fee:'),
-                    Text(
-                      '₱${breakdown.summary.deliveryFee.toStringAsFixed(2)}',
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('VAT (12%):'),
-              Text('₱${breakdown.summary.vatAmount.toStringAsFixed(2)}'),
-            ],
-          ),
-          const Divider(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Subtotal:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Text(
-                '₱${breakdown.summary.total.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Color(0xFFC41D7F),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+    return OrderSummaryExpandable(
+      provider: provider,
+      showProductBreakdown: true,
+      showDeliveryFee: true,
     );
   }
 }
